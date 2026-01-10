@@ -1,53 +1,80 @@
 # ============================================
-# Samarth App - Docker Configuration
+# Samarth App - CEQU Labs Production (Render)
+# PHP 8.4 + Laravel 12 + PostgreSQL/MySQL + Vite
 # ============================================
 
-# Use PHP 8.2 as base image
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine3.20
 
-# Install system dependencies
+# Install system dependencies + PHP extensions
+# Pin Node.js to v20 (LTS) to avoid SQLite version mismatch issues
 RUN apk add --no-cache \
     git \
     unzip \
+    $PHPIZE_DEPS \
     libzip-dev \
-    zip \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    curl-dev \
+    oniguruma-dev \
     postgresql-dev \
-    nodejs \
+    freetype-dev \
+    libxml2-dev \
+    # NODE & LIBS - Pin to LTS version that works with Alpine 3.20
+    nodejs=20* \
     npm \
+    sqlite \
+    sqlite-dev \
     curl \
+    && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install \
-    zip \
-    pdo \
-    pdo_pgsql \
-    pcntl \
-    && npm install -g npm@latest
+        pdo_mysql \
+        pdo_pgsql \
+        pdo_sqlite \
+        zip \
+        exif \
+        pcntl \
+        gd \
+        curl \
+        mbstring \
+        xml \
+        intl \
+        bcmath \
+    && apk del $PHPIZE_DEPS \
+    && rm -rf /var/cache/apk/*
 
-# Set working directory
+# Verify installations (This step was failing, it should pass now)
+RUN node --version && npm --version && php --version
+
 WORKDIR /var/www/html
 
-# Copy composer files first for better caching
+# --- 1. PHP Dependencies ---
 COPY composer.json composer.lock* ./
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
 
-# Install Composer
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# --- 2. JS Dependencies ---
+COPY package*.json ./
+# Only install dependencies here (using cache)
+RUN npm ci
 
-# Copy application code
+# --- 3. Copy Application Code ---
 COPY . .
 
-# Install NPM dependencies and build assets
-RUN npm ci --only=production && npm run build
+# --- 4. Build Assets ---
+# This will now work because code is present
+RUN npm run build \
+    && npm prune --production
 
-# Run Laravel optimization commands
-RUN php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache
+# --- 5. Laravel Setup ---
+RUN php artisan config:cache \
+    && php artisan route:cache \
+    && php artisan view:cache
 
-# Expose port 9000 (PHP-FPM)
+# Fix permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage
+
 EXPOSE 9000
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Start PHP-FPM
 CMD ["php-fpm"]
-
