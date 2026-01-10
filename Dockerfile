@@ -43,11 +43,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Note: PHP module is already enabled by default in php:8.2-apache image
 RUN a2enmod rewrite
 
-# Copy custom Apache configuration
-COPY docker/apache2.conf /etc/apache2/apache2.conf
+# Copy custom Apache site configuration
+COPY docker/apache2.conf /etc/apache2/sites-available/000-default.conf
 
-# Set proper permissions
-RUN chmod 644 /etc/apache2/apache2.conf
+# Enable the site and set proper permissions
+RUN a2ensite 000-default && chmod 644 /etc/apache2/sites-available/000-default.conf
 
 # Verify installations
 RUN node --version && npm --version && php --version && apachectl -v
