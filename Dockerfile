@@ -75,6 +75,6 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage
 
-EXPOSE 9000
+EXPOSE 8080
 
 CMD ["php-fpm"]
