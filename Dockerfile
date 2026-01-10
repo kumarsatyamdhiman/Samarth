@@ -6,9 +6,10 @@
 FROM php:8.4-fpm-alpine3.20
 
 # Install system dependencies + PHP extensions
-# FIX: Added sqlite-libs to the list and --repository flag ensures we get the Edge versions
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
-    git unzip \
+# Pin Node.js to v20 (LTS) to avoid SQLite version mismatch issues
+RUN apk add --no-cache \
+    git \
+    unzip \
     $PHPIZE_DEPS \
     libzip-dev \
     libpng-dev \
@@ -18,15 +19,17 @@ RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/ma
     postgresql-dev \
     freetype-dev \
     libxml2-dev \
-    # NODE & LIBS FIX
-    nodejs \
+    # NODE & LIBS - Pin to LTS version that works with Alpine 3.20
+    nodejs=20* \
     npm \
-    sqlite-libs \
+    sqlite \
+    sqlite-dev \
     curl \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install \
         pdo_mysql \
         pdo_pgsql \
+        pdo_sqlite \
         zip \
         exif \
         pcntl \
