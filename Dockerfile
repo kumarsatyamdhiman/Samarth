@@ -57,7 +57,6 @@ COPY package*.json ./
 RUN npm ci
 
 # --- 3. Copy Application Code ---
-# MOVED UP: Must copy code (including vite.config.js) BEFORE running build
 COPY . .
 
 # --- 4. Setup Laravel ---
@@ -65,22 +64,11 @@ COPY . .
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
 # Note: No database migrations needed - app uses JSON file storage
-# JSON data files are included in the repository
-
-# Clear all caches
-RUN php artisan config:clear \
-    && php artisan route:clear \
-    && php artisan view:clear \
-    && php artisan cache:clear
+# Note: Skipping php artisan cache commands as they require database connection
 
 # Build assets
 RUN npm run build \
     && npm prune --production
-
-# Recache configurations for production
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
 
 # Fix permissions
 RUN chown -R www-data:www-data /var/www/html \
