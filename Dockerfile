@@ -10,38 +10,32 @@ FROM php:8.4-apache-alpine3.20
 RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/community \
     git \
     unzip \
-    $PHPIZE_DEPS \
     libzip-dev \
     libpng-dev \
-    libjpeg-turbo-dev \
-    curl-dev \
-    oniguruma-dev \
-    postgresql-dev \
-    freetype-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     libxml2-dev \
-    # Node.js from community repo
-    nodejs \
-    npm \
-    sqlite-libs \
-    sqlite-dev \
+    libonig-dev \
+    libpq-dev \
     curl \
     apache2-utils \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install \
         pdo_mysql \
         pdo_pgsql \
-        pdo_sqlite \
         zip \
         exif \
         pcntl \
         gd \
-        curl \
-        mbstring \
-        xml \
-        intl \
         bcmath \
-    && apk del $PHPIZE_DEPS \
-    && rm -rf /var/cache/apk/*
+        intl \
+        mbstring \
+        xml
+
+# 2. Install Node.js v20 (LTS)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@latest
 
 # Enable Apache mod_rewrite and PHP modules
 RUN a2enmod rewrite \
@@ -57,32 +51,30 @@ RUN a2enmod rewrite \
 # Verify installations
 RUN node --version && npm --version && php --version && apachectl -v
 
+# 4. Enable Apache Rewrite Module
+RUN a2enmod rewrite
+
+# 5. Configure Apache Document Root
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 6. Setup Application
 WORKDIR /var/www/html
 
-# --- 1. PHP Dependencies ---
 COPY composer.json composer.lock* ./
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
 
-# --- 2. JS Dependencies ---
 COPY package*.json ./
 RUN npm ci
 
-# --- 3. Copy Application Code ---
 COPY . .
 
-# --- 4. Setup Laravel ---
-# Create .env from example if not exists
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
+# 7. Build Assets
+RUN npm run build && npm prune --production
 
-# Note: No database migrations needed - app uses JSON file storage
-# Note: Skipping php artisan cache commands as they require database connection
-
-# Build assets
-RUN npm run build \
-    && npm prune --production
-
-# Fix permissions
+# 8. Permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage \
