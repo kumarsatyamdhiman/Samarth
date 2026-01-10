@@ -6,7 +6,7 @@
 FROM php:8.4-fpm-alpine3.20
 
 # Install system dependencies + PHP extensions
-# Use Alpine edge/community repository for compatible Node.js version
+# Use Alpine community repository for compatible Node.js version
 RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/community \
     git \
     unzip \
@@ -19,7 +19,7 @@ RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/c
     postgresql-dev \
     freetype-dev \
     libxml2-dev \
-    # Node.js from community repo (v20.x for SQLite compatibility)
+    # Node.js from community repo
     nodejs \
     npm \
     sqlite \
@@ -60,12 +60,24 @@ RUN npm ci
 # --- 3. Copy Application Code ---
 COPY . .
 
-# --- 4. Build Assets ---
-# This will now work because code is present
+# --- 4. Setup Laravel ---
+# Create .env from example if not exists
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
+# Run migrations and seeders
+RUN php artisan migrate --force --seed
+
+# Clear all caches
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear \
+    && php artisan cache:clear
+
+# Build assets
 RUN npm run build \
     && npm prune --production
 
-# --- 5. Laravel Setup ---
+# Recache configurations for production
 RUN php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
