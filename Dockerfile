@@ -1,80 +1,81 @@
 # ============================================
-# Samarth App - CEQU Labs Production (Render)
-# PHP 8.4 + Laravel 12 + JSON File Storage + Vite
+# Samarth App - Render Production
+# PHP 8.4 + Apache (Web Server) + Node 20
 # ============================================
 
-FROM php:8.4-fpm-alpine3.20
+# 1. Use Apache base image (Fixes the "Port timeout" error)
+FROM php:8.4-apache
 
-# Install system dependencies + PHP extensions
-# Use Alpine community repository for compatible Node.js version
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/community \
+# 2. Install System Dependencies
+# We use standard apt-get (Debian) which avoids the "sqlite symbol" errors you saw in Alpine
+RUN apt-get update && apt-get install -y \
     git \
     unzip \
-    $PHPIZE_DEPS \
     libzip-dev \
     libpng-dev \
-    libjpeg-turbo-dev \
-    curl-dev \
-    oniguruma-dev \
-    postgresql-dev \
-    freetype-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     libxml2-dev \
-    # Node.js from community repo
-    nodejs \
-    npm \
-    sqlite-libs \
-    sqlite-dev \
+    libonig-dev \
+    libpq-dev \
     curl \
+    gnupg \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install \
         pdo_mysql \
         pdo_pgsql \
-        pdo_sqlite \
         zip \
         exif \
         pcntl \
         gd \
-        curl \
-        mbstring \
-        xml \
-        intl \
         bcmath \
-    && apk del $PHPIZE_DEPS \
-    && rm -rf /var/cache/apk/*
+        intl \
+        mbstring \
+        xml
 
-# Verify installations
-RUN node --version && npm --version && php --version
+# 3. Install Node.js v20 (LTS) correctly for Debian
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@latest
 
+# 4. Clean up to keep image small
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# 5. Enable Apache Rewrite Module (Required for Laravel routing)
+RUN a2enmod rewrite
+
+# 6. Configure Apache Document Root to /public
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 7. CRITICAL FIX: Bind Apache to Render's Dynamic Port
+# Render assigns a random port (env var $PORT). We must tell Apache to listen on it.
+RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
+
+# 8. Setup Application
 WORKDIR /var/www/html
 
-# --- 1. PHP Dependencies ---
+# --- Dependencies ---
 COPY composer.json composer.lock* ./
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
 
-# --- 2. JS Dependencies ---
 COPY package*.json ./
 RUN npm ci
 
-# --- 3. Copy Application Code ---
+# --- App Code & Build ---
 COPY . .
 
-# --- 4. Setup Laravel ---
-# Create .env from example if not exists
+# Build Vite Assets
+RUN npm run build && npm prune --production
+
+# Create .env from example (JSON storage mode)
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
-# Note: No database migrations needed - app uses JSON file storage
-# Note: Skipping php artisan cache commands as they require database connection
-
-# Build assets
-RUN npm run build \
-    && npm prune --production
-
-# Fix permissions
+# --- Permissions ---
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-EXPOSE 80
-
-CMD ["php-fpm"]
+# 9. Start Apache (Not FPM)
+CMD ["apache2-foreground"]
