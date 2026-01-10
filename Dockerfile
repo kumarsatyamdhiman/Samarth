@@ -6,8 +6,8 @@
 FROM php:8.4-fpm-alpine3.20
 
 # Install system dependencies + PHP extensions
-# Pin Node.js to v20 (LTS) to avoid SQLite version mismatch issues
-RUN apk add --no-cache \
+# We add the Edge repository to get the latest Node.js (v22+) compatible with Vite 7.3
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
     git \
     unzip \
     $PHPIZE_DEPS \
@@ -19,10 +19,10 @@ RUN apk add --no-cache \
     postgresql-dev \
     freetype-dev \
     libxml2-dev \
-    # NODE & LIBS - Pin to LTS version that works with Alpine 3.20
-    nodejs=20* \
+    # FIX: Install Node, NPM, AND sqlite-libs from Edge to prevent symbol errors
+    nodejs \
     npm \
-    sqlite \
+    sqlite-libs \
     sqlite-dev \
     curl \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
@@ -42,7 +42,7 @@ RUN apk add --no-cache \
     && apk del $PHPIZE_DEPS \
     && rm -rf /var/cache/apk/*
 
-# Verify installations (This step was failing, it should pass now)
+# Verify installations
 RUN node --version && npm --version && php --version
 
 WORKDIR /var/www/html
@@ -58,10 +58,10 @@ COPY package*.json ./
 RUN npm ci
 
 # --- 3. Copy Application Code ---
+# MOVED UP: Must copy code (including vite.config.js) BEFORE running build
 COPY . .
 
 # --- 4. Build Assets ---
-# This will now work because code is present
 RUN npm run build \
     && npm prune --production
 
