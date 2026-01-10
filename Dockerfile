@@ -1,6 +1,6 @@
 # ============================================
 # Samarth App - CEQU Labs Production (Render)
-# PHP 8.4 + Laravel 12 + PostgreSQL/MySQL + Vite
+# PHP 8.4 + Laravel 12 + JSON File Storage + Vite
 # ============================================
 
 FROM php:8.4-fpm-alpine3.20
@@ -54,7 +54,6 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platfo
 
 # --- 2. JS Dependencies ---
 COPY package*.json ./
-# Only install dependencies here (using cache)
 RUN npm ci
 
 # --- 3. Copy Application Code ---
@@ -65,8 +64,8 @@ COPY . .
 # Create .env from example if not exists
 RUN if [ ! -f .env ]; then cp .env.example .env; fi
 
-# Run migrations and seeders
-RUN php artisan migrate --force --seed
+# Note: No database migrations needed - app uses JSON file storage
+# JSON data files are included in the repository
 
 # Clear all caches
 RUN php artisan config:clear \
@@ -91,4 +90,3 @@ RUN chown -R www-data:www-data /var/www/html \
 EXPOSE 9000
 
 CMD ["php-fpm"]
-
