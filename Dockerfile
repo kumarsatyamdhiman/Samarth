@@ -1,13 +1,11 @@
 # ============================================
 # Samarth App - Render Production
-# PHP 8.4 + Apache (Web Server) + Node 20
+# PHP 8.4 + Apache + Runtime Port Fix
 # ============================================
 
-# 1. Use Apache base image (Fixes the "Port timeout" error)
 FROM php:8.4-apache
 
-# 2. Install System Dependencies
-# We use standard apt-get (Debian) which avoids the "sqlite symbol" errors you saw in Alpine
+# 1. Install System Dependencies (Debian-based)
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -33,30 +31,25 @@ RUN apt-get update && apt-get install -y \
         mbstring \
         xml
 
-# 3. Install Node.js v20 (LTS) correctly for Debian
+# 2. Install Node.js v20 (LTS)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g npm@latest
 
-# 4. Clean up to keep image small
+# 3. Clean up
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 5. Enable Apache Rewrite Module (Required for Laravel routing)
+# 4. Enable Apache Rewrite Module
 RUN a2enmod rewrite
 
-# 6. Configure Apache Document Root to /public
+# 5. Configure Apache Document Root
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# 7. CRITICAL FIX: Bind Apache to Render's Dynamic Port
-# Render assigns a random port (env var $PORT). We must tell Apache to listen on it.
-RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf
-
-# 8. Setup Application
+# 6. Setup Application
 WORKDIR /var/www/html
 
-# --- Dependencies ---
 COPY composer.json composer.lock* ./
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
@@ -64,18 +57,16 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platfo
 COPY package*.json ./
 RUN npm ci
 
-# --- App Code & Build ---
 COPY . .
 
-# Build Vite Assets
+# 7. Build Assets
 RUN npm run build && npm prune --production
 
-# Create .env from example (JSON storage mode)
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
-
-# --- Permissions ---
+# 8. Permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 9. Start Apache (Not FPM)
-CMD ["apache2-foreground"]
+# 9. THE RUNTIME FIX
+# We use a shell command to replace port 80 with $PORT (10000) RIGHT NOW as the app starts.
+# Then we start Apache.
+CMD ["/bin/bash", "-c", "sed -i \"s/80/$PORT/g\" /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf && php artisan config:cache && apache2-foreground"]
