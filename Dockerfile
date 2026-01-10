@@ -1,12 +1,13 @@
 # ============================================
-# Samarth App - Render Production
-# PHP 8.4 + Apache + Runtime Port Fix
+# Samarth App - CEQU Labs Production (Render)
+# PHP 8.4 + Laravel 12 + JSON File Storage + Vite + Apache
 # ============================================
 
-FROM php:8.4-apache
+FROM php:8.4-apache-alpine3.20
 
-# 1. Install System Dependencies (Debian-based)
-RUN apt-get update && apt-get install -y \
+# Install system dependencies + PHP extensions + Apache
+# Use Alpine community repository for compatible Node.js version
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/community \
     git \
     unzip \
     libzip-dev \
@@ -17,7 +18,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libpq-dev \
     curl \
-    gnupg \
+    apache2-utils \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install \
         pdo_mysql \
@@ -36,8 +37,19 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g npm@latest
 
-# 3. Clean up
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# Enable Apache mod_rewrite and PHP modules
+RUN a2enmod rewrite \
+    && a2enmod php8 \
+    && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/httpd.conf \
+    && sed -i 's|DocumentRoot "/var/www/html"|DocumentRoot "/var/www/html/public"|g' /etc/apache2/httpd.conf \
+    && echo "<Directory \"/var/www/html/public\">" >> /etc/apache2/httpd.conf \
+    && echo "    Options Indexes FollowSymLinks" >> /etc/apache2/httpd.conf \
+    && echo "    AllowOverride All" >> /etc/apache2/httpd.conf \
+    && echo "    Require all granted" >> /etc/apache2/httpd.conf \
+    && echo "</Directory>" >> /etc/apache2/httpd.conf
+
+# Verify installations
+RUN node --version && npm --version && php --version && apachectl -v
 
 # 4. Enable Apache Rewrite Module
 RUN a2enmod rewrite
@@ -64,9 +76,12 @@ RUN npm run build && npm prune --production
 
 # 8. Permissions
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+    && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 644 /var/www/html/public
 
-# 9. THE RUNTIME FIX
-# We use a shell command to replace port 80 with $PORT (10000) RIGHT NOW as the app starts.
-# Then we start Apache.
-CMD ["/bin/bash", "-c", "sed -i \"s/80/$PORT/g\" /etc/apache2/sites-available/000-default.conf /etc/apache2/ports.conf && php artisan config:cache && apache2-foreground"]
+# Apache listens on port 80
+EXPOSE 80
+
+# Use Apache as the main process
+CMD ["apache2-foreground"]
