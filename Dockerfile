@@ -41,14 +41,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 # Enable Apache mod_rewrite and configure Document Root to /public
 # Note: PHP module is already enabled by default in php:8.2-apache image
-RUN a2enmod rewrite \
-    && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
-    && sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/apache2.conf \
-    && echo "<Directory /var/www/html/public>" >> /etc/apache2/apache2.conf \
-    && echo "    Options Indexes FollowSymLinks" >> /etc/apache2/apache2.conf \
-    && echo "    AllowOverride All" >> /etc/apache2/apache2.conf \
-    && echo "    Require all granted" >> /etc/apache2/apache2.conf \
-    && echo "</Directory>" >> /etc/apache2/apache2.conf
+RUN a2enmod rewrite
+
+# Copy custom Apache configuration
+COPY docker/apache2.conf /etc/apache2/apache2.conf
+
+# Set proper permissions
+RUN chmod 644 /etc/apache2/apache2.conf
 
 # Verify installations
 RUN node --version && npm --version && php --version && apachectl -v
