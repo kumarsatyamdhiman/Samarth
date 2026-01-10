@@ -49,6 +49,10 @@ COPY docker/apache2.conf /etc/apache2/sites-available/000-default.conf
 # Enable the site and set proper permissions
 RUN a2ensite 000-default && chmod 644 /etc/apache2/sites-available/000-default.conf
 
+# Copy custom entrypoint and make it executable
+COPY docker/apache2-foreground /usr/local/bin/
+RUN chmod +x /usr/local/bin/apache2-foreground
+
 # Verify installations
 RUN node --version && npm --version && php --version && apachectl -v
 
