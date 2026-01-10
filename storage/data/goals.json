@@ -1,0 +1,5 @@
+[
+    {"id": 1, "user_id": 0, "title": "Complete JEE Preparation", "description": "Prepare thoroughly for JEE Main and Advanced", "category": "education", "priority": "high", "status": "active", "progress": 0, "created_at": "2026-01-01T00:00:00Z"},
+    {"id": 2, "user_id": 0, "title": "Learn a New Skill", "description": "Master a new programming language or technology", "category": "personal", "priority": "medium", "status": "active", "progress": 0, "created_at": "2026-01-01T00:00:00Z"}
+]
+

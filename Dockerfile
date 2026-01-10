@@ -6,8 +6,8 @@
 FROM php:8.4-fpm-alpine3.20
 
 # Install system dependencies + PHP extensions
-# We add the Edge repository to get the latest Node.js (v22+) compatible with Vite 7.3
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
+# Use Alpine community repository for compatible Node.js version
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/community \
     git \
     unzip \
     $PHPIZE_DEPS \
@@ -19,7 +19,7 @@ RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/edge/ma
     postgresql-dev \
     freetype-dev \
     libxml2-dev \
-    # FIX: Install Node, NPM, AND sqlite-libs from Edge to prevent symbol errors
+    # Node.js from community repo
     nodejs \
     npm \
     sqlite-libs \
@@ -61,11 +61,24 @@ RUN npm ci
 # MOVED UP: Must copy code (including vite.config.js) BEFORE running build
 COPY . .
 
-# --- 4. Build Assets ---
+# --- 4. Setup Laravel ---
+# Create .env from example if not exists
+RUN if [ ! -f .env ]; then cp .env.example .env; fi
+
+# Run migrations and seeders
+RUN php artisan migrate --force --seed
+
+# Clear all caches
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear \
+    && php artisan cache:clear
+
+# Build assets
 RUN npm run build \
     && npm prune --production
 
-# --- 5. Laravel Setup ---
+# Recache configurations for production
 RUN php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
@@ -78,3 +91,4 @@ RUN chown -R www-data:www-data /var/www/html \
 EXPOSE 9000
 
 CMD ["php-fpm"]
+

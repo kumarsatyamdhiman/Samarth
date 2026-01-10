@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "key": "science",
+        "name": "Science",
+        "description": "Physical sciences, biology, and research",
+        "icon": "flask",
+        "color": "blue"
+    },
+    {
+        "id": 2,
+        "key": "commerce",
+        "name": "Commerce",
+        "description": "Business, finance, and accounting",
+        "icon": "chart-line",
+        "color": "green"
+    },
+    {
+        "id": 3,
+        "key": "arts",
+        "name": "Arts",
+        "description": "Humanities, social sciences, and creative fields",
+        "icon": "palette",
+        "color": "purple"
+    },
+    {
+        "id": 4,
+        "key": "engineering",
+        "name": "Engineering",
+        "description": "Technical and applied sciences",
+        "icon": "cogs",
+        "color": "orange"
+    },
+    {
+        "id": 5,
+        "key": "medical",
+        "name": "Medical",
+        "description": "Healthcare and medicine",
+        "icon": "heartbeat",
+        "color": "red"
+    },
+    {
+        "id": 6,
+        "key": "agriculture",
+        "name": "Agriculture",
+        "description": "Farming, horticulture, and agribusiness",
+        "icon": "leaf",
+        "color": "emerald"
+    }
+]

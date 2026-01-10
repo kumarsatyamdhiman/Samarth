@@ -1,0 +1,18 @@
+[
+    {"id": 1, "stream_id": 1, "key": "physics", "name": "Physics", "description": "Study of matter, energy, and their interactions", "careers": ["Research Scientist", "Astronomer", "Engineer", "Data Scientist"]},
+    {"id": 2, "stream_id": 1, "key": "chemistry", "name": "Chemistry", "description": "Study of substances and their properties", "careers": ["Chemist", "Pharmacologist", "Forensic Scientist", "Lab Technician"]},
+    {"id": 3, "stream_id": 1, "key": "biology", "name": "Biology", "description": "Study of living organisms", "careers": ["Biologist", "Doctor", "Biotechnologist", "Environmental Scientist"]},
+    {"id": 4, "stream_id": 1, "key": "mathematics", "name": "Mathematics", "description": "Study of numbers, quantities, and shapes", "careers": ["Mathematician", "Statistician", "Actuary", "Financial Analyst"]},
+    {"id": 5, "stream_id": 2, "key": "accounting", "name": "Accounting", "description": "Recording and analyzing financial transactions", "careers": ["Chartered Accountant", "Auditor", "Tax Consultant", "Financial Controller"]},
+    {"id": 6, "stream_id": 2, "key": "finance", "name": "Finance", "description": "Management of money and investments", "careers": ["Financial Analyst", "Investment Banker", "Portfolio Manager", "Financial Advisor"]},
+    {"id": 7, "stream_id": 2, "key": "business", "name": "Business Administration", "description": "Managing business operations", "careers": ["Business Manager", "Entrepreneur", "Marketing Manager", "CEO"]},
+    {"id": 8, "stream_id": 3, "key": "history", "name": "History", "description": "Study of past events", "careers": ["Historian", "Archivist", "Museum Curator", "Writer"]},
+    {"id": 9, "stream_id": 3, "key": "psychology", "name": "Psychology", "description": "Study of mind and behavior", "careers": ["Psychologist", "Counselor", "HR Manager", "Researcher"]},
+    {"id": 10, "stream_id": 3, "key": "literature", "name": "Literature", "description": "Study of written works", "careers": ["Author", "Editor", "Literary Critic", "Teacher"]},
+    {"id": 11, "stream_id": 4, "key": "computer", "name": "Computer Science", "description": "Computing and programming", "careers": ["Software Developer", "AI Engineer", "Data Scientist", "Cybersecurity Expert"]},
+    {"id": 12, "stream_id": 4, "key": "mechanical", "name": "Mechanical Engineering", "description": "Design and manufacturing of machines", "careers": ["Mechanical Engineer", "Automotive Engineer", "Robotics Engineer", "Product Designer"]},
+    {"id": 13, "stream_id": 5, "key": "mbbs", "name": "MBBS", "description": "Bachelor of Medicine and Surgery", "careers": ["Doctor", "Surgeon", "Medical Researcher", "Specialist"]},
+    {"id": 14, "stream_id": 5, "key": "nursing", "name": "Nursing", "description": "Healthcare and patient care", "careers": ["Nurse", "Healthcare Administrator", "Clinical Specialist", "Nurse Practitioner"]},
+    {"id": 15, "stream_id": 6, "key": "agriculture_science", "name": "Agricultural Science", "description": "Science of farming and cultivation", "careers": ["Agronomist", "Farm Manager", "Agricultural Scientist", "Food Technologist"]}
+]
+
