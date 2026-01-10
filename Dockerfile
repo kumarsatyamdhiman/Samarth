@@ -3,11 +3,10 @@
 # PHP 8.2 + Laravel 12 + JSON File Storage + Vite + Apache
 # ============================================
 
-FROM php:8.2-apache-alpine3.18
+FROM php:8.2-apache-bookworm
 
 # Install system dependencies + PHP extensions + Apache
-# Use Alpine community repository for compatible Node.js version
-RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.18/community \
+RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libzip-dev \
@@ -19,7 +18,10 @@ RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.18/c
     libpq-dev \
     curl \
     apache2-utils \
-    && docker-php-ext-configure gd --with-jpeg --with-freetype \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install \
         pdo_mysql \
         pdo_pgsql \
@@ -32,49 +34,43 @@ RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.18/c
         mbstring \
         xml
 
-# 2. Install Node.js v20 (LTS)
+# Install Node.js v20 (LTS)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && npm install -g npm@latest
+    && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache mod_rewrite and PHP modules
+# Enable Apache mod_rewrite and configure Document Root to /public
 RUN a2enmod rewrite \
-    && a2enmod php8 \
-    && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/httpd.conf \
-    && sed -i 's|DocumentRoot "/var/www/html"|DocumentRoot "/var/www/html/public"|g' /etc/apache2/httpd.conf \
-    && echo "<Directory \"/var/www/html/public\">" >> /etc/apache2/httpd.conf \
-    && echo "    Options Indexes FollowSymLinks" >> /etc/apache2/httpd.conf \
-    && echo "    AllowOverride All" >> /etc/apache2/httpd.conf \
-    && echo "    Require all granted" >> /etc/apache2/httpd.conf \
-    && echo "</Directory>" >> /etc/apache2/httpd.conf
+    && a2enmod php8.2 \
+    && sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/apache2.conf \
+    && echo "<Directory /var/www/html/public>" >> /etc/apache2/apache2.conf \
+    && echo "    Options Indexes FollowSymLinks" >> /etc/apache2/apache2.conf \
+    && echo "    AllowOverride All" >> /etc/apache2/apache2.conf \
+    && echo "    Require all granted" >> /etc/apache2/apache2.conf \
+    && echo "</Directory>" >> /etc/apache2/apache2.conf
 
 # Verify installations
 RUN node --version && npm --version && php --version && apachectl -v
 
-# 4. Enable Apache Rewrite Module
-RUN a2enmod rewrite
-
-# 5. Configure Apache Document Root
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
-# 6. Setup Application
+# Setup Application
 WORKDIR /var/www/html
 
+# Install PHP dependencies
 COPY composer.json composer.lock* ./
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs
 
+# Install JS dependencies
 COPY package*.json ./
 RUN npm ci
 
+# Copy application code
 COPY . .
 
-# 7. Build Assets
+# Build assets
 RUN npm run build && npm prune --production
 
-# 8. Permissions
+# Fix permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage \
@@ -85,3 +81,4 @@ EXPOSE 80
 
 # Use Apache as the main process
 CMD ["apache2-foreground"]
+
