@@ -1,9 +1,9 @@
 # ============================================
 # Samarth App - CEQU Labs Production (Render)
-# PHP 8.4 + Laravel 12 + JSON File Storage + Vite + Apache
+# PHP 8.3 + Laravel 12 + JSON File Storage + Vite + Apache
 # ============================================
 
-FROM php:8.4-apache-alpine3.19
+FROM php:8.3-apache-alpine3.19
 
 # Install system dependencies + PHP extensions + Apache
 # Use Alpine community repository for compatible Node.js version
