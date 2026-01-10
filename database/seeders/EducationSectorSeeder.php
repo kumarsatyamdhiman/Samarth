@@ -1,0 +1,148 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\EducationSector;
+
+class EducationSectorSeeder extends Seeder
+{
+    public function run()
+    {
+        $sectors = [
+            [
+                'key' => 'engineering',
+                'name_hindi' => 'इंजीनियरिंग और तकनीक',
+                'name_english' => 'Engineering & Technology',
+                'description_hindi' => 'इंजीनियरिंग और तकनीक क्षेत्र में सॉफ्टवेयर, मैकेनिकल, सिविल, इलेक्ट्रॉनिक्स और अन्य तकनीकी क्षेत्र शामिल हैं। यह क्षेत्र नवाचार और समस्या समाधान पर केंद्रित है।',
+                'description_english' => 'Engineering & Technology sector includes software, mechanical, civil, electronics, and other technical fields. This sector focuses on innovation and problem-solving.',
+                'why_important_hindi' => 'देश के विकास में इंजीनियरों की महत्वपूर्ण भूमिका होती है। यह क्षेत्र रोजगार के अवसर, अच्छी आय और तकनीकी विकास के लिए अवसर प्रदान करता है।',
+                'why_important_english' => 'Engineers play a crucial role in nation development. This sector provides employment opportunities, good income, and scope for technical advancement.',
+                'eligibility_10th_hindi' => ['गणित और विज्ञान में अच्छे अंक', 'तकनीकी रुचि', 'समस्या समाधान की क्षमता'],
+                'eligibility_10th_english' => ['Good marks in Mathematics and Science', 'Technical interest', 'Problem-solving ability'],
+                'eligibility_12th_hindi' => ['भौतिकी, रसायन, गणित (PCM) या भौतिकी, रसायन, जीव विज्ञान (PCB)', 'JEE मुख्य परीक्षा पास करना'],
+                'eligibility_12th_english' => ['Physics, Chemistry, Mathematics (PCM) or Physics, Chemistry, Biology (PCB)', 'Pass JEE Main exam'],
+                'career_prospects_hindi' => ['सॉफ्टवेयर इंजीनियर', 'मैकेनिकल इंजीनियर', 'सिविल इंजीनियर', 'इलेक्ट्रॉनिक्स इंजीनियर', 'डेटा साइंटिस्ट'],
+                'career_prospects_english' => ['Software Engineer', 'Mechanical Engineer', 'Civil Engineer', 'Electronics Engineer', 'Data Scientist'],
+                'icon' => 'fa-cogs',
+                'color' => '#06b6d4',
+                'sort_order' => 1,
+            ],
+            [
+                'key' => 'medicine',
+                'name_hindi' => 'स्वास्थ्य और चिकित्सा',
+                'name_english' => 'Health & Medicine',
+                'description_hindi' => 'स्वास्थ्य और चिकित्सा क्षेत्र में डॉक्टर, नर्स, फार्मासिस्ट और अन्य स्वास्थ्य पेशेवर शामिल हैं। यह मानव स्वास्थ्य और जीवन रक्षा के लिए समर्पित है।',
+                'description_english' => 'Health & Medicine sector includes doctors, nurses, pharmacists, and other health professionals. This sector is dedicated to human health and life preservation.',
+                'why_important_hindi' => 'चिकित्सा क्षेत्र समाज की सेवा और मानव जीवन बचाने के लिए महत्वपूर्ण है। यह सम्मानजनक पेशा और स्थिर आय प्रदान करता है।',
+                'why_important_english' => 'Medical field is important for societal service and saving human lives. It provides a respectable profession and stable income.',
+                'eligibility_10th_hindi' => ['जीव विज्ञान में रुचि', 'विज्ञान और गणित में अच्छे अंक', 'मरीजों से सेवा भाव'],
+                'eligibility_10th_english' => ['Interest in Biology', 'Good marks in Science and Mathematics', 'Service mindset towards patients'],
+                'eligibility_12th_hindi' => ['भौतिकी, रसायन, जीव विज्ञान (PCB)', 'NEET-UG परीक्षा पास करना', 'कम से कम 50% अंक'],
+                'eligibility_12th_english' => ['Physics, Chemistry, Biology (PCB)', 'Pass NEET-UG exam', 'Minimum 50% marks'],
+                'career_prospects_hindi' => ['डॉक्टर (MBBS)', 'नर्स', 'फार्मासिस्ट', 'मेडिकल रिसर्चर', 'स्वास्थ्य प्रशासक'],
+                'career_prospects_english' => ['Doctor (MBBS)', 'Nurse', 'Pharmacist', 'Medical Researcher', 'Health Administrator'],
+                'icon' => 'fa-heartbeat',
+                'color' => '#ef4444',
+                'sort_order' => 2,
+            ],
+            [
+                'key' => 'commerce',
+                'name_hindi' => 'वाणिज्य और वित्त',
+                'name_english' => 'Commerce & Finance',
+                'description_hindi' => 'वाणिज्य और वित्त क्षेत्र में बैंकिंग, निवेश, बीमा, चार्टर्ड अकाउंटेंसी और व्यापार प्रबंधन शामिल हैं। यह आर्थिक विकास और व्यापार में महत्वपूर्ण भूमिका निभाता है।',
+                'description_english' => 'Commerce & Finance sector includes banking, investment, insurance, chartered accountancy, and business management. It plays a crucial role in economic development and business.',
+                'why_important_hindi' => 'वाणिज्य क्षेत्र देश की आर्थिक वृद्धि में महत्वपूर्ण है। यह व्यापारिक निर्णय, वित्तीय योजना और आर्थिक विकास के लिए आवश्यक है।',
+                'why_important_english' => 'Commerce sector is crucial for national economic growth. It is essential for business decisions, financial planning, and economic development.',
+                'eligibility_10th_hindi' => ['गणित में रुचि', 'व्यापारिक सोच', 'अंकों और लेखांकन में दक्षता'],
+                'eligibility_10th_english' => ['Interest in Mathematics', 'Business mindset', 'Aptitude for numbers and accounting'],
+                'eligibility_12th_hindi' => ['अर्थशास्त्र, लेखा, व्यवसाय अध्ययन', 'CA/CS/CMA प्रवेश परीक्षा के लिए तैयारी'],
+                'eligibility_12th_english' => ['Economics, Accountancy, Business Studies', 'Preparation for CA/CS/CMA entrance exams'],
+                'career_prospects_hindi' => ['चार्टर्ड अकाउंटेंट', 'बैंक मैनेजर', 'वित्तीय विश्लेषक', 'इन्वेस्टमेंट बैंकर', 'बिजनेस एनालिस्ट'],
+                'career_prospects_english' => ['Chartered Accountant', 'Bank Manager', 'Financial Analyst', 'Investment Banker', 'Business Analyst'],
+                'icon' => 'fa-chart-line',
+                'color' => '#10b981',
+                'sort_order' => 3,
+            ],
+            [
+                'key' => 'government',
+                'name_hindi' => 'सरकारी सेवा और नागरिक सेवा',
+                'name_english' => 'Government & Civil Services',
+                'description_hindi' => 'सरकारी सेवा क्षेत्र में UPSC, SSC, राज्य PSC, बैंकिंग और रेलवे की नौकरियां शामिल हैं। यह सार्वजनिक सेवा और राष्ट्र निर्माण के लिए समर्पित है।',
+                'description_english' => 'Government service sector includes UPSC, SSC, State PSC, banking, and railway jobs. This sector is dedicated to public service and nation building.',
+                'why_important_hindi' => 'सिविल सेवा देश की सेवा और जनकल्याण के लिए महत्वपूर्ण है। यह स्थिर नौकरी, सामाजिक सम्मान और राष्ट्रीय विकास में योगदान देती है।',
+                'why_important_english' => 'Civil service is important for national service and public welfare. It provides stable job, social respect, and contribution to national development.',
+                'eligibility_10th_hindi' => ['शिक्षा में रुचि', 'सामाजिक सेवा की भावना', 'विश्लेषणात्मक सोच'],
+                'eligibility_10th_english' => ['Interest in education', 'Social service mindset', 'Analytical thinking'],
+                'eligibility_12th_hindi' => ['किसी भी स्ट्रीम से स्नातक', 'UPSC, SSC या अन्य सरकारी परीक्षाओं की तैयारी'],
+                'eligibility_12th_english' => ['Graduation in any stream', 'Preparation for UPSC, SSC or other government exams'],
+                'career_prospects_hindi' => ['IAS अधिकारी', 'IPS अधिकारी', 'बैंक PO', 'रेलवे अधिकारी', 'टैक्स अधिकारी'],
+                'career_prospects_english' => ['IAS Officer', 'IPS Officer', 'Bank PO', 'Railway Officer', 'Tax Officer'],
+                'icon' => 'fa-landmark',
+                'color' => '#8b5cf6',
+                'sort_order' => 4,
+            ],
+            [
+                'key' => 'defence',
+                'name_hindi' => 'रक्षा और पुलिस',
+                'name_english' => 'Defence & Police',
+                'description_hindi' => 'रक्षा और पुलिस क्षेत्र में भारतीय सेना, वायु सेना, नौसेना, CRPF, BSF और अन्य सुरक्षा बल शामिल हैं। यह देश की सुरक्षा और शांति बनाए रखने के लिए समर्पित है।',
+                'description_english' => 'Defence & Police sector includes Indian Army, Air Force, Navy, CRPF, BSF and other security forces. This sector is dedicated to maintaining national security and peace.',
+                'why_important_hindi' => 'रक्षा सेवा देश की सुरक्षा और संप्रभुता के लिए अत्यंत महत्वपूर्ण है। यह वीरता, अनुशासन और देशभक्ति की भावना को बढ़ावा देती है।',
+                'why_important_english' => 'Defence service is extremely important for national security and sovereignty. It promotes valor, discipline, and patriotic spirit.',
+                'eligibility_10th_hindi' => ['शारीरिक फिटनेस', 'राष्ट्रभक्ति की भावना', 'अनुशासन का पालन'],
+                'eligibility_10th_english' => ['Physical fitness', 'Patriotic spirit', 'Discipline compliance'],
+                'eligibility_12th_hindi' => ['भौतिकी और गणित (तकनीकी पदों के लिए)', 'NDA या अन्य रक्षा परीक्षाओं की तैयारी'],
+                'eligibility_12th_english' => ['Physics and Mathematics (for technical posts)', 'Preparation for NDA or other defence exams'],
+                'career_prospects_hindi' => ['आर्मी ऑफिसर', 'वायु सेना पायलट', 'नेवी ऑफिसर', 'पुलिस अधिकारी', 'CRPF जवान'],
+                'career_prospects_english' => ['Army Officer', 'Air Force Pilot', 'Navy Officer', 'Police Officer', 'CRPF Personnel'],
+                'icon' => 'fa-shield-alt',
+                'color' => '#059669',
+                'sort_order' => 5,
+            ],
+            [
+                'key' => 'law',
+                'name_hindi' => 'कानून और सामाजिक कार्य',
+                'name_english' => 'Law & Social Sector',
+                'description_hindi' => 'कानून और सामाजिक कार्य क्षेत्र में वकील, न्यायाधीश, सामाजिक कार्यकर्ता, मानवाधिकार कार्यकर्ता और NGO प्रबंधक शामिल हैं। यह न्याय, समानता और सामाजिक न्याय के लिए समर्पित है।',
+                'description_english' => 'Law & Social Sector includes lawyers, judges, social workers, human rights activists, and NGO managers. This sector is dedicated to justice, equality, and social justice.',
+                'why_important_hindi' => 'कानूनी और सामाजिक कार्य समाज में न्याय और समानता सुनिश्चित करने के लिए आवश्यक है। यह मानवाधिकारों की रक्षा और सामाजिक परिवर्तन में महत्वपूर्ण भूमिका निभाता है।',
+                'why_important_english' => 'Legal and social work is essential to ensure justice and equality in society. It plays a crucial role in protecting human rights and social transformation.',
+                'eligibility_10th_hindi' => ['भाषाओं में रुचि', 'वाद-विवाद की क्षमता', 'सामाजिक न्याय की भावना'],
+                'eligibility_10th_english' => ['Interest in languages', 'Debating ability', 'Sense of social justice'],
+                'eligibility_12th_hindi' => ['किसी भी स्ट्रीम से स्नातक (कानून की डिग्री के लिए)', 'CLAT या अन्य कानूनी प्रवेश परीक्षाएं'],
+                'eligibility_12th_english' => ['Graduation in any stream (for law degree)', 'CLAT or other law entrance exams'],
+                'career_prospects_hindi' => ['वकील', 'जज', 'कानूनी सलाहकार', 'सामाजिक कार्यकर्ता', 'मानवाधिकार कार्यकर्ता'],
+                'career_prospects_english' => ['Lawyer', 'Judge', 'Legal Advisor', 'Social Worker', 'Human Rights Activist'],
+                'icon' => 'fa-balance-scale',
+                'color' => '#7c3aed',
+                'sort_order' => 6,
+            ],
+            [
+                'key' => 'skills',
+                'name_hindi' => 'कौशल और व्यावसायिक शिक्षा',
+                'name_english' => 'Skills & Vocational Education',
+                'description_hindi' => 'कौशल और व्यावसायिक शिक्षा में ITI, पॉलीटेक्निक, डिजिटल स्किल्स, हैंडीक्राफ्ट और अन्य व्यावसायिक प्रशिक्षण शामिल हैं। यह व्यावहारिक कौशल और तुरंत रोजगार के लिए केंद्रित है।',
+                'description_english' => 'Skills & Vocational Education includes ITI, polytechnic, digital skills, handicrafts, and other vocational training. This focuses on practical skills and immediate employment.',
+                'why_important_hindi' => 'व्यावसायिक शिक्षा व्यावहारिक कौशल प्रदान करती है और तुरंत रोजगार के अवसर देती है। यह आत्मनिर्भरता और छोटे व्यापार शुरू करने के लिए मदद करती है।',
+                'why_important_english' => 'Vocational education provides practical skills and immediate employment opportunities. It helps in self-reliance and starting small businesses.',
+                'eligibility_10th_hindi' => ['व्यावहारिक काम में रुचि', 'हाथों से काम करने की क्षमता', 'तकनीकी सीखने की इच्छा'],
+                'eligibility_10th_english' => ['Interest in practical work', 'Ability to work with hands', 'Desire to learn technical skills'],
+                'eligibility_12th_hindi' => ['10वीं पास', 'व्यावसायिक पाठ्यक्रमों के लिए प्रवेश परीक्षा'],
+                'eligibility_12th_english' => ['10th pass', 'Entrance exam for vocational courses'],
+                'career_prospects_hindi' => ['इलेक्ट्रिशियन', 'प्लम्बर', 'कुक', 'डिजिटल मार्केटर', 'कंप्यूटर ऑपरेटर'],
+                'career_prospects_english' => ['Electrician', 'Plumber', 'Cook', 'Digital Marketer', 'Computer Operator'],
+                'icon' => 'fa-tools',
+                'color' => '#f59e0b',
+                'sort_order' => 7,
+            ],
+        ];
+
+        foreach ($sectors as $sector) {
+            EducationSector::updateOrCreate(
+                ['key' => $sector['key']],
+                $sector
+            );
+        }
+    }
+}

@@ -1,0 +1,122 @@
+[
+    {
+        "id": 1,
+        "name": "गाँव की लड़की का नर्स बनने का सफ़र",
+        "link": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+        "type": "career",
+        "thumbnail": "https://img.youtube.com/vi/aqz-KE-bpKQ/0.jpg",
+        "duration": "4:15",
+        "views_count": 2400000,
+        "author": "प्रेरणादायक कहानी"
+    },
+    {
+        "id": 2,
+        "name": "खेल से नाम कमाया - अमन की जीत",
+        "link": "https://www.youtube.com/watch?v=M7lc1UVf-VE",
+        "type": "sports",
+        "thumbnail": "https://img.youtube.com/vi/M7lc1UVf-VE/0.jpg",
+        "duration": "3:30",
+        "views_count": 1800000,
+        "author": "खेल प्रेरणा"
+    },
+    {
+        "id": 3,
+        "name": "सपना सच हुआ: पुलिस अफ़सर बनी",
+        "link": "https://www.youtube.com/watch?v=tgbNymZ7vqY",
+        "type": "career",
+        "thumbnail": "https://img.youtube.com/vi/tgbNymZ7vqY/0.jpg",
+        "duration": "5:15",
+        "views_count": 5100000,
+        "author": "सफलता की कहानी"
+    },
+    {
+        "id": 4,
+        "name": "मिट्टी की कला से रोज़गार",
+        "link": "https://www.youtube.com/watch?v=9bZkp7q19f0",
+        "type": "skills",
+        "thumbnail": "https://img.youtube.com/vi/9bZkp7q19f0/0.jpg",
+        "duration": "4:00",
+        "views_count": 3200000,
+        "author": "कला और कमाई"
+    },
+    {
+        "id": 5,
+        "name": "सफलता की कुंजी - मेरा अनुभव",
+        "link": "https://www.youtube.com/watch?v=fJ9rUzIMcZQ",
+        "type": "motivational",
+        "thumbnail": "https://img.youtube.com/vi/fJ9rUzIMcZQ/0.jpg",
+        "duration": "6:20",
+        "views_count": 8500000,
+        "author": "प्रेरणा"
+    },
+    {
+        "id": 6,
+        "name": "योग से स्वास्थ्य - शुरुआत कैसे करें",
+        "link": "https://www.youtube.com/watch?v=GlnejxnvFlU",
+        "type": "health",
+        "thumbnail": "https://img.youtube.com/vi/GlnejxnvFlU/0.jpg",
+        "duration": "8:30",
+        "views_count": 12000000,
+        "author": "स्वास्थ्य टिप्स"
+    },
+    {
+        "id": 7,
+        "name": "ज़िला टॉपर बनी - पढ़ाई का महत्व",
+        "link": "https://www.youtube.com/watch?v=2Vv-BfVoq4g",
+        "type": "education",
+        "thumbnail": "https://img.youtube.com/vi/2Vv-BfVoq4g/0.jpg",
+        "duration": "4:45",
+        "views_count": 6700000,
+        "author": "शैक्षिक प्रेरणा"
+    },
+    {
+        "id": 8,
+        "name": "क्रिकेटर बनने का सपना पूरा किया",
+        "link": "https://www.youtube.com/watch?v=OP12bV52GLc",
+        "type": "sports",
+        "thumbnail": "https://img.youtube.com/vi/OP12bV52GLc/0.jpg",
+        "duration": "5:50",
+        "views_count": 9200000,
+        "author": "खेल प्रेरणा"
+    },
+    {
+        "id": 9,
+        "name": "इलेक्ट्रीशियन बनकर आत्मनिर्भर",
+        "link": "https://www.youtube.com/watch?v=NGF8C961dPM",
+        "type": "skills",
+        "thumbnail": "https://img.youtube.com/vi/NGF8C961dPM/0.jpg",
+        "duration": "3:15",
+        "views_count": 2800000,
+        "author": "हुनर सीखें"
+    },
+    {
+        "id": 10,
+        "name": "डॉक्टर बनने का सफ़र",
+        "link": "https://www.youtube.com/watch?v=SqcY0GlETPk",
+        "type": "career",
+        "thumbnail": "https://img.youtube.com/vi/SqcY0GlETPk/0.jpg",
+        "duration": "7:25",
+        "views_count": 15000000,
+        "author": "मेडिकल प्रेरणा"
+    },
+    {
+        "id": 11,
+        "name": "कंप्यूटर सीखकर नौकरी पाई",
+        "link": "https://www.youtube.com/watch?v=kTcmK64xMAk",
+        "type": "skills",
+        "thumbnail": "https://img.youtube.com/vi/kTcmK64xMAk/0.jpg",
+        "duration": "4:20",
+        "views_count": 4500000,
+        "author": "टेक स्किल्स"
+    },
+    {
+        "id": 12,
+        "name": "सुबह की दिनचर्या - सफलता की कुंजी",
+        "link": "https://www.youtube.com/watch?v=LO6C_O7m9qI",
+        "type": "motivational",
+        "thumbnail": "https://img.youtube.com/vi/LO6C_O7m9qI/0.jpg",
+        "duration": "3:00",
+        "views_count": 11000000,
+        "author": "जीवनशैली"
+    }
+]
