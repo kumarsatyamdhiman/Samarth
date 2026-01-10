@@ -8,7 +8,7 @@ services:
     buildCommand: |
       composer install --no-dev --optimize-autoloader
       cp .env.example .env 2>/dev/null || true
-    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    startCommand: apache2-foreground
     healthCheckPath: /
     envVars:
       - key: APP_ENV

@@ -1,11 +1,11 @@
 # ============================================
 # Samarth App - CEQU Labs Production (Render)
-# PHP 8.4 + Laravel 12 + JSON File Storage + Vite
+# PHP 8.4 + Laravel 12 + JSON File Storage + Vite + Apache
 # ============================================
 
-FROM php:8.4-fpm-alpine3.20
+FROM php:8.4-apache-alpine3.20
 
-# Install system dependencies + PHP extensions
+# Install system dependencies + PHP extensions + Apache
 # Use Alpine community repository for compatible Node.js version
 RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/community \
     git \
@@ -25,6 +25,7 @@ RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/c
     sqlite-libs \
     sqlite-dev \
     curl \
+    apache2-utils \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install \
         pdo_mysql \
@@ -42,8 +43,19 @@ RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/c
     && apk del $PHPIZE_DEPS \
     && rm -rf /var/cache/apk/*
 
+# Enable Apache mod_rewrite and PHP modules
+RUN a2enmod rewrite \
+    && a2enmod php8 \
+    && sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/httpd.conf \
+    && sed -i 's|DocumentRoot "/var/www/html"|DocumentRoot "/var/www/html/public"|g' /etc/apache2/httpd.conf \
+    && echo "<Directory \"/var/www/html/public\">" >> /etc/apache2/httpd.conf \
+    && echo "    Options Indexes FollowSymLinks" >> /etc/apache2/httpd.conf \
+    && echo "    AllowOverride All" >> /etc/apache2/httpd.conf \
+    && echo "    Require all granted" >> /etc/apache2/httpd.conf \
+    && echo "</Directory>" >> /etc/apache2/httpd.conf
+
 # Verify installations
-RUN node --version && npm --version && php --version
+RUN node --version && npm --version && php --version && apachectl -v
 
 WORKDIR /var/www/html
 
@@ -73,8 +85,11 @@ RUN npm run build \
 # Fix permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 644 /var/www/html/public
 
-EXPOSE 9000
+# Apache listens on port 80
+EXPOSE 80
 
-CMD ["php-fpm"]
+# Use Apache as the main process
+CMD ["apache2-foreground"]
