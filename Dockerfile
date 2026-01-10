@@ -6,8 +6,8 @@
 FROM php:8.4-fpm-alpine3.20
 
 # Install system dependencies + PHP extensions
-# Pin Node.js to v20 (LTS) to avoid SQLite version mismatch issues
-RUN apk add --no-cache \
+# Use Alpine edge/community repository for compatible Node.js version
+RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/community \
     git \
     unzip \
     $PHPIZE_DEPS \
@@ -19,8 +19,8 @@ RUN apk add --no-cache \
     postgresql-dev \
     freetype-dev \
     libxml2-dev \
-    # NODE & LIBS - Pin to LTS version that works with Alpine 3.20
-    nodejs=20* \
+    # Node.js from community repo (v20.x for SQLite compatibility)
+    nodejs \
     npm \
     sqlite \
     sqlite-dev \
@@ -42,7 +42,7 @@ RUN apk add --no-cache \
     && apk del $PHPIZE_DEPS \
     && rm -rf /var/cache/apk/*
 
-# Verify installations (This step was failing, it should pass now)
+# Verify installations
 RUN node --version && npm --version && php --version
 
 WORKDIR /var/www/html
@@ -78,3 +78,4 @@ RUN chown -R www-data:www-data /var/www/html \
 EXPOSE 9000
 
 CMD ["php-fpm"]
+
