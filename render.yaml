@@ -1,0 +1,40 @@
+# Render Blueprint Configuration for Samarth App
+# Connect this file to Render for automatic deployment
+
+services:
+  - type: web
+    name: samarth-app
+    env: php
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      cp .env.example .env 2>/dev/null || true
+    startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_NAME
+        value: SAMARTH
+      - key: CACHE_DRIVER
+        value: file
+      - key: SESSION_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: LOG_CHANNEL
+        value: stderr
+
+  # Optional: Background worker for queues
+  - type: worker
+    name: samarth-worker
+    env: php
+    buildCommand: composer install --no-dev --optimize-autoloader
+    startCommand: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+

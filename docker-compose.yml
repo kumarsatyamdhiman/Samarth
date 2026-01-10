@@ -1,0 +1,73 @@
+# ============================================
+# Samarth App - Docker Compose Configuration
+# ============================================
+
+services:
+  # PHP-FPM Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: samarth-app
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - samarth-network
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=local
+
+  # Nginx Web Server
+  nginx:
+    image: nginx:alpine
+    container_name: samarth-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - samarth-network
+    depends_on:
+      - app
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: samarth-postgres
+    environment:
+      POSTGRES_DB: samarth
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - samarth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache (Optional)
+  redis:
+    image: redis:7-alpine
+    container_name: samarth-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - samarth-network
+
+networks:
+  samarth-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
