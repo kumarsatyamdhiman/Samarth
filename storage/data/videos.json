@@ -1,0 +1,6 @@
+[
+    {"id": 1, "title": "Welcome to Samarth", "description": "Introduction to the Samarth platform", "url": "https://www.youtube.com/watch?v=welcome", "thumbnail": "https://img.youtube.com/vi/welcome/0.jpg", "category": "orientation", "duration": 300, "created_at": "2026-01-01T00:00:00Z"},
+    {"id": 2, "title": "Education Path Overview", "description": "Understanding your educational journey", "url": "https://www.youtube.com/watch?v=education_path", "thumbnail": "https://img.youtube.com/vi/education_path/0.jpg", "category": "education", "duration": 600, "created_at": "2026-01-02T00:00:00Z"},
+    {"id": 3, "title": "Goal Setting Techniques", "description": "How to set effective goals", "url": "https://www.youtube.com/watch?v=goals", "thumbnail": "https://img.youtube.com/vi/goals/0.jpg", "category": "goals", "duration": 450, "created_at": "2026-01-03T00:00:00Z"}
+]
+

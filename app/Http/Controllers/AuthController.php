@@ -6,10 +6,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use App\Models\SamarthUser;
+use Illuminate\Support\Facades\Session;
+use App\Services\JsonDataStore;
 
 class AuthController extends Controller
 {
+    protected $users;
+
+    public function __construct()
+    {
+        $this->users = new JsonDataStore();
+    }
+
     public function showLogin()
     {
         return view('auth.login');
@@ -25,8 +33,8 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:samarth_users,username',
-            'email' => 'required|string|email|max:255|unique:samarth_users,email',
+            'username' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255',
             'phone' => 'nullable|string|max:20',
             'gender' => 'required|string|in:male,female,other,prefer_not_to_say',
             'date_of_birth' => 'required|date|before:today',
@@ -36,10 +44,8 @@ class AuthController extends Controller
             'first_name.required' => 'पहला नाम आवश्यक है',
             'last_name.required' => 'उपनाम आवश्यक है',
             'username.required' => 'यूज़रनेम आवश्यक है',
-            'username.unique' => 'यह यूज़रनेम पहले से उपयोग में है',
             'email.required' => 'ईमेल आवश्यक है',
             'email.email' => 'कृपया सही ईमेल दर्ज करें',
-            'email.unique' => 'यह ईमेल पहले से रजिस्टर है',
             'gender.required' => 'लिंग चुनना आवश्यक है',
             'date_of_birth.required' => 'जन्म तिथि आवश्यक है',
             'date_of_birth.before' => 'जन्म तिथि आज से पहले होनी चाहिए',
@@ -53,7 +59,19 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        $user = SamarthUser::create([
+        // Check if username or email already exists
+        $existingUser = $this->users->findBy('users', 'username', $request->username);
+        if ($existingUser) {
+            return back()->withErrors(['username' => 'यह यूज़रनेम पहले से उपयोग में है'])->withInput();
+        }
+
+        $existingEmail = $this->users->findBy('users', 'email', $request->email);
+        if ($existingEmail) {
+            return back()->withErrors(['email' => 'यह ईमेल पहले से रजिस्टर है'])->withInput();
+        }
+
+        // Create new user in JSON store
+        $user = $this->users->create('users', [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'username' => $request->username,
@@ -70,9 +88,10 @@ class AuthController extends Controller
             'language' => 'hi',
         ]);
 
-        Auth::login($user);
+        // Log in the user
+        Auth::loginUsingId($user['id']);
 
-        return redirect()->route('home')->with('success', 'स्वागत है ' . $user->first_name . '! आपका खाता सफलतापूर्वक बन गया है।');
+        return redirect()->route('home')->with('success', 'स्वागत है ' . $user['first_name'] . '! आपका खाता सफलतापूर्वक बन गया है।');
     }
 
     public function login(Request $request)
@@ -82,14 +101,14 @@ class AuthController extends Controller
             'password' => 'required|string'
         ]);
 
-        // Find user in database
-        $user = SamarthUser::where('username', $request->username)->first();
+        // Find user in JSON store
+        $user = $this->users->findBy('users', 'username', $request->username);
 
-        if ($user && Hash::check($request->password, $user->password)) {
-            Auth::login($user);
+        if ($user && Hash::check($request->password, $user['password'])) {
+            Auth::loginUsingId($user['id']);
             $request->session()->regenerate();
 
-            return redirect()->intended('/home')->with('success', 'स्वागत है ' . $user->first_name . '!');
+            return redirect()->intended('/home')->with('success', 'स्वागत है ' . $user['first_name'] . '!');
         }
 
         return back()->withErrors([
@@ -113,17 +132,23 @@ class AuthController extends Controller
     public function checkSecurityQuestion(Request $request)
     {
         $request->validate([
-            'username' => 'required|string|exists:samarth_users,username'
+            'username' => 'required|string'
         ]);
 
-        $user = SamarthUser::where('username', $request->username)->first();
+        $user = $this->users->findBy('users', 'username', $request->username);
         
-        // Get the user's security question (stored as security_question field)
-        $securityQuestion = $user->security_question ?? 'school';
+        if (!$user) {
+            return back()->withErrors(['username' => 'यह यूज़रनेम मौजूद नहीं है।']);
+        }
+        
+        // Get the user's security question
+        $securityQuestion = $user['security_question'] ?? 'school';
+        $securityAnswer = $user['security_answer'] ?? '';
         
         // Store in session for step 2
-        $request->session()->put('reset_username', $user->username);
+        $request->session()->put('reset_username', $user['username']);
         $request->session()->put('security_question', $securityQuestion);
+        $request->session()->put('security_answer', $securityAnswer);
         
         return redirect()->route('password.recovery');
     }
@@ -140,37 +165,32 @@ class AuthController extends Controller
         ]);
 
         $username = $request->session()->get('reset_username');
-        $securityQuestion = $request->session()->get('security_question');
+        $storedAnswer = $request->session()->get('security_answer');
         
         if (!$username || $username !== $request->username) {
-            $request->session()->forget(['reset_username', 'security_question']);
+            $request->session()->forget(['reset_username', 'security_question', 'security_answer']);
             return redirect()->route('password.recovery')->with('error', 'Session expired. Please try again.');
         }
 
-        $user = SamarthUser::where('username', $username)->first();
-        
-        if (!$user) {
-            $request->session()->forget(['reset_username', 'security_question']);
-            return redirect()->route('password.recovery')->with('error', 'User not found.');
-        }
-
-        // Verify security answer (stored as security_answer field)
-        $storedAnswer = $user->security_answer ?? '';
-        $providedAnswer = trim($request->security_answer);
-        
-        // Simple case-insensitive comparison
-        if (strtolower($storedAnswer) !== strtolower($providedAnswer)) {
-            $request->session()->forget(['reset_username', 'security_question']);
+        // Verify security answer
+        if (strtolower(trim($storedAnswer)) !== strtolower(trim($request->security_answer))) {
+            $request->session()->forget(['reset_username', 'security_question', 'security_answer']);
             return redirect()->route('password.recovery')->with('error', 'सुरक्षा प्रश्न का उत्तर गलत है।');
         }
 
-        // Update password
-        $user->password = Hash::make($request->password);
-        $user->save();
+        // Update password in JSON store
+        $user = $this->users->findBy('users', 'username', $username);
+        
+        if ($user) {
+            $this->users->update('users', $user['id'], [
+                'password' => Hash::make($request->password)
+            ]);
+        }
 
         // Clear session
-        $request->session()->forget(['reset_username', 'security_question']);
+        $request->session()->forget(['reset_username', 'security_question', 'security_answer']);
 
         return redirect()->route('login')->with('success', 'पासवर्ड सफलतापूर्वक बदल दिया गया है! अब लॉगिन करें।');
     }
 }
+
