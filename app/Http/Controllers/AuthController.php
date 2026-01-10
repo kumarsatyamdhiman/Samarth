@@ -106,4 +106,71 @@ class AuthController extends Controller
 
         return redirect('/')->with('success', 'आपने सफलतापूर्वक लॉग आउट किया है।');
     }
+
+    /**
+     * Check security question for password recovery
+     */
+    public function checkSecurityQuestion(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string|exists:samarth_users,username'
+        ]);
+
+        $user = SamarthUser::where('username', $request->username)->first();
+        
+        // Get the user's security question (stored as security_question field)
+        $securityQuestion = $user->security_question ?? 'school';
+        
+        // Store in session for step 2
+        $request->session()->put('reset_username', $user->username);
+        $request->session()->put('security_question', $securityQuestion);
+        
+        return redirect()->route('password.recovery');
+    }
+
+    /**
+     * Reset password after security question verification
+     */
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+            'security_answer' => 'required|string',
+            'password' => 'required|string|min:6|confirmed'
+        ]);
+
+        $username = $request->session()->get('reset_username');
+        $securityQuestion = $request->session()->get('security_question');
+        
+        if (!$username || $username !== $request->username) {
+            $request->session()->forget(['reset_username', 'security_question']);
+            return redirect()->route('password.recovery')->with('error', 'Session expired. Please try again.');
+        }
+
+        $user = SamarthUser::where('username', $username)->first();
+        
+        if (!$user) {
+            $request->session()->forget(['reset_username', 'security_question']);
+            return redirect()->route('password.recovery')->with('error', 'User not found.');
+        }
+
+        // Verify security answer (stored as security_answer field)
+        $storedAnswer = $user->security_answer ?? '';
+        $providedAnswer = trim($request->security_answer);
+        
+        // Simple case-insensitive comparison
+        if (strtolower($storedAnswer) !== strtolower($providedAnswer)) {
+            $request->session()->forget(['reset_username', 'security_question']);
+            return redirect()->route('password.recovery')->with('error', 'सुरक्षा प्रश्न का उत्तर गलत है।');
+        }
+
+        // Update password
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Clear session
+        $request->session()->forget(['reset_username', 'security_question']);
+
+        return redirect()->route('login')->with('success', 'पासवर्ड सफलतापूर्वक बदल दिया गया है! अब लॉगिन करें।');
+    }
 }

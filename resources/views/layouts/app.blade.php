@@ -99,8 +99,27 @@
     <div class="max-w-md mx-auto bg-white min-h-screen relative shadow-2xl overflow-hidden">
         
         <header class="glass-header fixed top-0 w-full max-w-md z-50 px-4 py-3 flex justify-between items-center transition-transform duration-300" id="main-header">
-            <div>
-                <h1 class="text-2xl font-bold text-gradient cursor-pointer" onclick="window.scrollTo({top:0, behavior:'smooth'})">SAMARTH</h1>
+            <div class="flex items-center gap-2">
+                <!-- SAMARTH Logo SVG - Smaller & Aligned -->
+                <svg width="100" height="38" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="headerLogoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#2196F3" />
+                            <stop offset="25%" style="stop-color:#9C27B0" />
+                            <stop offset="50%" style="stop-color:#F44336" />
+                            <stop offset="75%" style="stop-color:#FFEB3B" />
+                            <stop offset="100%" style="stop-color:#4CAF50" />
+                        </linearGradient>
+                    </defs>
+                    <g class="samarth-text">
+                        <text x="50%" y="65%" text-anchor="middle" font-size="80" font-weight="900" 
+                              style="font-family: 'Poppins', 'Arial Black', 'Helvetica Neue', sans-serif;"
+                              fill="url(#headerLogoGradient)">
+                            SAMARTH
+                        </text>
+                    </g>
+                    <path d="M330 40 L370 20 L365 55" fill="none" stroke="url(#headerLogoGradient)" stroke-width="4" stroke-linecap="round"/>
+                </svg>
                 @auth
                     @php
                         $user = auth()->user();
@@ -108,7 +127,7 @@
                         $hour = date('H');
                         $greeting = $hour < 12 ? 'सुप्रभात' : ($hour < 17 ? 'नमस्ते' : 'शुभ संध्या');
                     @endphp
-                    <div class="text-xs font-medium text-gray-500 animate-fade-in-up">
+                    <div class="text-xs font-medium text-gray-500 animate-fade-in-up ml-2">
                         {{ $greeting }}, {{ $displayName }} ✨
                     </div>
                 @endauth

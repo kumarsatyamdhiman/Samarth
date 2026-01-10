@@ -17,6 +17,13 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Password Recovery Routes
+Route::get('/password/recovery', function() {
+    return view('auth.password-recovery');
+})->name('password.security.request');
+Route::post('/password/security/check', [AuthController::class, 'checkSecurityQuestion'])->name('password.security.check');
+Route::post('/password/security/reset', [AuthController::class, 'resetPassword'])->name('password.security.reset');
+
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
