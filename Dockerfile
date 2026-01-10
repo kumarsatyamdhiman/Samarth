@@ -22,7 +22,7 @@ RUN apk add --no-cache --repository=http://dl-cdn.alpinelinux.org/alpine/v3.20/c
     # Node.js from community repo
     nodejs \
     npm \
-    sqlite \
+    sqlite-libs \
     sqlite-dev \
     curl \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
@@ -58,6 +58,7 @@ COPY package*.json ./
 RUN npm ci
 
 # --- 3. Copy Application Code ---
+# MOVED UP: Must copy code (including vite.config.js) BEFORE running build
 COPY . .
 
 # --- 4. Setup Laravel ---
