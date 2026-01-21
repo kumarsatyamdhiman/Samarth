@@ -20,6 +20,10 @@ class EducationController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
         
         // Get or create user's education profile
         $profile = UserEducationProfile::firstOrCreate(
