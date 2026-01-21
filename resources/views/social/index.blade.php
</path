@@ -1,0 +1,555 @@
+@extends('layouts.app')
+
+@section('content')
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    insta: {
+                        pink: '#E1306C',
+                        orange: '#F58301',
+                        purple: '#833AB4',
+                        blue: '#405DE6',
+                        gradient: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)'
+                    }
+                }
+            }
+        }
+    }
+</script>
+
+<style>
+    .insta-gradient { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+    .story-ring { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888, #833AB4, #405DE6); padding: 2px; border-radius: 50%; }
+    .verified-badge { background: #1D9BF0; border-radius: 50%; padding: 2px; }
+    .like-anim { animation: likePop 0.3s ease-out; }
+    @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    .double-tap-hint { animation: fadeInOut 1.5s ease-out; }
+    @keyframes fadeInOut { 0%, 100% { opacity: 0; } 20%, 80% { opacity: 1; } }
+</style>
+
+<div class="min-h-screen bg-black pb-20">
+    
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-40 bg-black/95 backdrop-blur-md border-b border-gray-800">
+        <div class="flex items-center justify-between px-4 py-2">
+            <h1 class="text-2xl font-bold tracking-tight" style="font-family: 'Billabong', cursive;">
+                <span class="insta-gradient bg-clip-text text-transparent">SAMARTH</span>
+            </h1>
+            <div class="flex items-center gap-4">
+                <button class="text-white hover:text-gray-300 transition-colors">
+                    <i class="far fa-heart text-xl"></i>
+                </button>
+                <button class="text-white hover:text-gray-300 transition-colors relative">
+                    <i class="far fa-paper-plane text-xl"></i>
+                </button>
+            </div>
+    </header>
+
+    <!-- Stories Section -->
+    <div class="pt-14 pb-2 border-b border-gray-800">
+        <div class="flex gap-4 px-4 overflow-x-auto no-scrollbar pb-2">
+            <!-- Add Story -->
+            <div class="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer" onclick="openCreateStory()">
+                <div class="w-16 h-16 rounded-full story-ring">
+                    <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                        @auth
+                            @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                                <img src="{{ auth()->user()->profile->avatar }}" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-earth-saffron to-orange-500 flex items-center justify-center text-white font-bold">
+                                    {{ substr(auth()->user()->username ?? 'U', 0, 1) }}
+                                </div>
+                            @endif
+                        @else
+                            <div class="w-full h-full flex items-center justify-center">
+                                <i class="fas fa-plus text-gray-500 text-2xl"></i>
+                            </div>
+                        @endauth
+                    </div>
+                <span class="text-[10px] text-gray-400">आप</span>
+            </div>
+            
+            <!-- Real Stories from Database -->
+            @forelse($stories as $story)
+            <div class="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer" onclick="viewStory('{{ $story['id'] }}')">
+                <div class="w-16 h-16 rounded-full story-ring">
+                    <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                        @if(isset($story['image']))
+                            <img src="{{ $story['image'] }}" class="w-full h-full object-cover" alt="Story">
+                        @else
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-earth-saffron to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+                                {{ substr($story['user']->first_name ?? 'U', 0, 1) }}
+                            </div>
+                        @endif
+                    </div>
+                <span class="text-[10px] text-gray-400 max-w-[60px] truncate">{{ $story['user']->first_name ?? 'User' }}</span>
+            </div>
+            @empty
+            <div class="flex-shrink-0 flex items-center justify-center px-4">
+                <p class="text-gray-500 text-xs text-center">कोई स्टोरी नहीं</p>
+            </div>
+            @endforelse
+        </div>
+
+    <!-- Real Posts Feed -->
+    <div class="pb-16" id="feed-container">
+        @forelse($posts as $post)
+        <div class="bg-black border-b border-gray-800" id="post-{{ $post->id }}" ondblclick="doubleTapLike('{{ $post->id }}')">
+            <!-- Post Header -->
+            <div class="flex items-center justify-between px-3 py-2">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full story-ring flex-shrink-0">
+                        <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-earth-saffron to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                                {{ substr($post->user->first_name ?? 'U', 0, 1) }}
+                            </div>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1">
+                            <span class="text-sm font-semibold text-white truncate">{{ $post->user->first_name ?? 'User' }}</span>
+                            @if(isset($post->user->verified) && $post->user->verified)
+                            <span class="verified-badge flex-shrink-0">
+                                <i class="fas fa-check text-white text-[8px]"></i>
+                            </span>
+                            @endif
+                        </div>
+                        <span class="text-[10px] text-gray-400 truncate block">@ {{ $post->user->username ?? 'user' }}</span>
+                    </div>
+                <button class="text-gray-400 hover:text-white">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+            </div>
+            
+            <!-- Post Image -->
+            <div class="relative w-full aspect-square bg-gray-900">
+                @if(isset($post->image) && $post->image)
+                    <img src="{{ $post->image }}" class="w-full h-full object-cover" alt="Post" loading="lazy">
+                @else
+                    <div class="w-full h-full flex items-center justify-center text-gray-500">
+                        <i class="fas fa-image text-4xl"></i>
+                    </div>
+                @endif
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 double-tap-hint" id="double-tap-{{ $post->id }}">
+                    <i class="fas fa-heart text-white text-6xl drop-shadow-lg"></i>
+                </div>
+            
+            <!-- Post Actions -->
+            <div class="px-3 py-2">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleLike('{{ $post->id }}')" id="like-btn-{{ $post->id }}" class="text-white hover:text-gray-300 transition-colors {{ $post->liked_by_user ? 'text-red-500' : '' }}">
+                            <i class="{{ $post->liked_by_user ? 'fas' : 'far' }} fa-heart text-xl" id="like-icon-{{ $post->id }}"></i>
+                        </button>
+                        <button onclick="openCommentModal('{{ $post->id }}')" class="text-white hover:text-gray-300 transition-colors">
+                            <i class="far fa-comment text-xl"></i>
+                        </button>
+                        <button onclick="sharePost('{{ $post->id }}')" class="text-white hover:text-gray-300 transition-colors">
+                            <i class="far fa-paper-plane text-xl"></i>
+                        </button>
+                    </div>
+                    <button onclick="toggleBookmark('{{ $post->id }}')" id="bookmark-btn-{{ $post->id }}" class="text-white hover:text-gray-300 transition-colors {{ $post->bookmarked_by_user ? 'text-yellow-400' : '' }}">
+                        <i class="{{ $post->bookmarked_by_user ? 'fas' : 'far' }} fa-bookmark text-xl" id="bookmark-icon-{{ $post->id }}"></i>
+                    </button>
+                </div>
+                
+                <!-- Likes -->
+                <p class="text-sm font-semibold text-white mb-1" id="likes-count-{{ $post->id }}">{{ number_format($post->likes_count ?? 0) }} likes</p>
+                
+                <!-- Caption -->
+                @if($post->content)
+                <div class="mb-1">
+                    <span class="text-sm font-semibold text-white mr-1.5">{{ $post->user->first_name ?? 'User' }}</span>
+                    <span class="text-sm text-white whitespace-pre-wrap break-words">{{ $post->content }}</span>
+                </div>
+                @endif
+                
+                <!-- Category -->
+                @if(isset($post->category))
+                <div class="mt-1 mb-1">
+                    <span class="text-xs bg-gray-800 text-blue-400 px-2 py-0.5 rounded-full inline-block">#{{ $post->category }}</span>
+                </div>
+                @endif
+                
+                <!-- Time -->
+                <p class="text-[10px] text-gray-500 mt-1 uppercase">{{ $post->time_ago ?? 'Just now' }}</p>
+            </div>
+        @empty
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+            <div class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                <i class="fas fa-photo-video text-3xl text-gray-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-white mb-2">फीड खाली है</h3>
+            <p class="text-sm text-gray-400 mb-4">पहली पोस्ट करें और अपनी यात्रा शुरू करें!</p>
+            <button onclick="openCreatePost()" class="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-2 rounded-full font-semibold">
+                पोस्ट करें
+            </button>
+        </div>
+        @endforelse
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-black border-t border-gray-800">
+        <div class="flex justify-around items-center h-14">
+            <a href="{{ route('social.index') }}" class="flex flex-col items-center justify-center w-full h-full text-white">
+                <i class="fas fa-home text-xl"></i>
+            </a>
+            <button onclick="openSearch()" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white transition-colors">
+                <i class="fas fa-search text-xl"></i>
+            </button>
+            <button onclick="openCreatePost()" class="flex flex-col items-center justify-center w-full h-full text-white">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-insta-pink via-insta-purple to-insta-blue flex items-center justify-center">
+                    <i class="fas fa-plus text-lg"></i>
+                </div>
+            </button>
+            <button class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white transition-colors">
+                <i class="far fa-play-square text-xl"></i>
+            </button>
+            <a href="{{ route('profile.show') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white transition-colors">
+                @auth
+                    @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                        <img src="{{ auth()->user()->profile->avatar }}" class="w-6 h-6 rounded-full object-cover">
+                    @else
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-earth-saffron to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                            {{ substr(auth()->user()->username ?? 'U', 0, 1) }}
+                        </div>
+                    @endif
+                @else
+                    <i class="far fa-user text-xl"></i>
+                @endauth
+            </a>
+        </div>
+    </nav>
+
+</div>
+
+<!-- Create Post Modal -->
+<div id="create-post-modal" class="fixed inset-0 z-50 bg-black/90 hidden">
+    <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+            <button onclick="closeCreatePost()" class="text-white hover:text-gray-300">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white">नई पोस्ट</h3>
+            <button onclick="submitPost()" class="text-blue-400 font-semibold">शेयर</button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4">
+            <div class="flex gap-3 mb-4">
+                @auth
+                    @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                        <img src="{{ auth()->user()->profile->avatar }}" class="w-10 h-10 rounded-full object-cover">
+                    @else
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-earth-saffron to-orange-500 flex items-center justify-center text-white font-bold">
+                            {{ substr(auth()->user()->username ?? 'U', 0, 1) }}
+                        </div>
+                    @endif
+                @endauth
+                <textarea id="post-caption" placeholder="आज क्या सीखा? शेयर करें..." class="flex-1 bg-transparent text-white text-lg placeholder-gray-500 focus:outline-none resize-none" rows="3"></textarea>
+            </div>
+            <div class="mb-4">
+                <p class="text-sm text-gray-400 mb-2">श्रेणी</p>
+                <div class="flex flex-wrap gap-2" id="category-buttons">
+                    <button type="button" class="category-btn px-3 py-1.5 bg-gray-800 text-white text-xs rounded-full border border-blue-500" data-category="Career">Career</button>
+                    <button type="button" class="category-btn px-3 py-1.5 bg-gray-800 text-gray-400 text-xs rounded-full" data-category="Exam Prep">Exam Prep</button>
+                    <button type="button" class="category-btn px-3 py-1.5 bg-gray-800 text-gray-400 text-xs rounded-full" data-category="Motivation">Motivation</button>
+                    <button type="button" class="category-btn px-3 py-1.5 bg-gray-800 text-gray-400 text-xs rounded-full" data-category="Social Cause">Social Cause</button>
+                </div>
+            <div class="flex items-center gap-4 text-gray-400">
+                <label class="cursor-pointer hover:text-white transition-colors">
+                    <i class="fas fa-image text-xl"></i>
+                    <input type="file" accept="image/*" class="hidden" id="post-image-input" onchange="previewImage(this)">
+                </label>
+            </div>
+            <div id="image-preview" class="hidden mt-4">
+                <img id="preview-img" src="" class="w-full max-h-48 object-contain rounded-lg bg-gray-800">
+                <button type="button" onclick="removeImage()" class="text-red-400 text-sm mt-2">हटाएं</button>
+            </div>
+    </div>
+
+<!-- Create Story Modal -->
+<div id="create-story-modal" class="fixed inset-0 z-50 bg-black hidden">
+    <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+            <button onclick="closeCreateStory()" class="text-white hover:text-gray-300">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white">नई स्टोरी</h3>
+            <button onclick="submitStory()" class="text-blue-400 font-semibold">शेयर</button>
+        </div>
+        <div class="flex-1 flex items-center justify-center p-4">
+            <label class="cursor-pointer w-full aspect-square max-w-sm bg-gray-800 rounded-2xl border-2 border-dashed border-gray-600 flex flex-col items-center justify-center hover:border-gray-400 transition-colors">
+                <i class="fas fa-camera text-4xl text-gray-500 mb-2"></i>
+                <span class="text-gray-400 text-sm">फोटो चुनें</span>
+                <input type="file" accept="image/*" class="hidden" id="story-image-input" onchange="previewStoryImage(this)">
+            </label>
+        </div>
+        <div id="story-preview" class="hidden p-4 border-t border-gray-800">
+            <img id="story-preview-img" src="" class="max-h-48 mx-auto rounded-lg object-contain">
+        </div>
+</div>
+
+<!-- Comment Modal -->
+<div id="comment-modal" class="fixed inset-0 z-50 bg-black/95 hidden">
+    <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+            <button onclick="closeCommentModal()" class="text-white hover:text-gray-300">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white">कमेंट्स</h3>
+            <span></span>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4" id="comments-list">
+            <p class="text-gray-500 text-center py-8">कोई कमेंट नहीं</p>
+        </div>
+        <div class="p-4 border-t border-gray-800">
+            <div class="flex gap-2">
+                @auth
+                    @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                        <img src="{{ auth()->user()->profile->avatar }}" class="w-8 h-8 rounded-full object-cover flex-shrink-0">
+                    @else
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-earth-saffron to-orange-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                            {{ substr(auth()->user()->username ?? 'U', 0, 1) }}
+                        </div>
+                    @endif
+                @endauth
+                <input type="text" id="comment-input" placeholder="कमेंट लिखें..." class="flex-1 bg-gray-800 text-white rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="submitComment()" class="text-blue-400 font-semibold text-sm px-2">पोस्ट</button>
+            </div>
+    </div>
+
+<!-- Search Modal -->
+<div id="search-modal" class="fixed inset-0 z-50 bg-black hidden">
+    <div class="h-full flex flex-col pt-12">
+        <div class="px-4 pb-3 border-b border-gray-800">
+            <div class="flex items-center gap-3 bg-gray-800 rounded-full px-4 py-2">
+                <i class="fas fa-search text-gray-400"></i>
+                <input type="text" placeholder="खोजें..." class="flex-1 bg-transparent text-white placeholder-gray-400 text-sm focus:outline-none" id="search-input">
+            </div>
+        <div class="flex-1 overflow-y-auto p-4" id="search-results">
+            <p class="text-gray-400 text-sm mb-3">प्रोफाइल खोजें</p>
+        </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-2.5 rounded-full shadow-xl opacity-0 transform translate-y-4 transition-all duration-300 z-50 flex items-center gap-2 max-w-xs">
+    <i class="fas fa-check-circle text-green-400 text-sm"></i>
+    <span id="toast-message" class="text-sm truncate"></span>
+</div>
+
+<script>
+    let currentPostId = null;
+    let selectedCategory = 'Career';
+    let selectedImage = null;
+    let selectedStoryImage = null;
+
+    // Category selection
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.category-btn').forEach(b => {
+                b.classList.remove('border-blue-500', 'text-white');
+                b.classList.add('text-gray-400');
+            });
+            this.classList.remove('text-gray-400');
+            this.classList.add('border-blue-500', 'text-white');
+            selectedCategory = this.dataset.category;
+        });
+    });
+
+    // Double tap like
+    function doubleTapLike(postId) {
+        const hint = document.getElementById(`double-tap-${postId}`);
+        if (hint) {
+            hint.classList.remove('opacity-0');
+            setTimeout(() => hint.classList.add('opacity-0'), 1500);
+        }
+        const btn = document.getElementById(`like-btn-${postId}`);
+        if (btn && !btn.classList.contains('text-red-500')) toggleLike(postId);
+    }
+    
+    // Toggle like
+    async function toggleLike(postId) {
+        const btn = document.getElementById(`like-btn-${postId}`);
+        const icon = document.getElementById(`like-icon-${postId}`);
+        const countEl = document.getElementById(`likes-count-${postId}`);
+        
+        try {
+            const response = await fetch(`/social/post/${postId}/like`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            if (data.liked) {
+                icon.classList.remove('far', 'like-anim');
+                icon.classList.add('fas', 'like-anim');
+                btn.classList.add('text-red-500');
+            } else {
+                icon.classList.remove('fas', 'like-anim');
+                icon.classList.add('far');
+                btn.classList.remove('text-red-500');
+            }
+            countEl.innerText = data.likeCount.toLocaleString() + ' likes';
+        } catch (error) {
+            let count = parseInt(countEl.innerText.replace(/,/g, '')) || 0;
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far', 'like-anim');
+                icon.classList.add('fas', 'like-anim');
+                btn.classList.add('text-red-500');
+                count++;
+            } else {
+                icon.classList.remove('fas', 'like-anim');
+                icon.classList.add('far');
+                btn.classList.remove('text-red-500');
+                count = Math.max(0, count - 1);
+            }
+            countEl.innerText = count.toLocaleString() + ' likes';
+        }
+    }
+    
+    // Toggle bookmark
+    function toggleBookmark(postId) {
+        const btn = document.getElementById(`bookmark-btn-${postId}`);
+        const icon = document.getElementById(`bookmark-icon-${postId}`);
+        if (icon.classList.contains('far')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            btn.classList.add('text-yellow-400');
+            showToast('पसंदीदा में जोड़ा गया');
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+            btn.classList.remove('text-yellow-400');
+            showToast('पसंदीदा से हटाया गया');
+        }
+    }
+    
+    // Share post
+    async function sharePost(postId) {
+        try {
+            await fetch(`/social/post/${postId}/share`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Content-Type': 'application/json'
+                }
+            });
+            showToast('पोस्ट शेयर हो गई!');
+        } catch (error) { showToast('पोस्ट शेयर हो गई!'); }
+    }
+    
+    // Modals
+    function openCreatePost() { document.getElementById('create-post-modal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    function closeCreatePost() { document.getElementById('create-post-modal').classList.add('hidden'); document.body.style.overflow = ''; }
+    function openCreateStory() { document.getElementById('create-story-modal').classList.remove('hidden'); }
+    function closeCreateStory() { document.getElementById('create-story-modal').classList.add('hidden'); }
+    
+    function openCommentModal(postId) {
+        currentPostId = postId;
+        document.getElementById('comment-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeCommentModal() { document.getElementById('comment-modal').classList.add('hidden'); document.body.style.overflow = ''; currentPostId = null; }
+    
+    function viewStory(storyId) { showToast('स्टोरी देखें'); }
+    function openSearch() { document.getElementById('search-modal').classList.remove('hidden'); }
+    
+    // Image handling
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedImage = e.target.result;
+                document.getElementById('preview-img').src = selectedImage;
+                document.getElementById('image-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function removeImage() { selectedImage = null; document.getElementById('image-preview').classList.add('hidden'); document.getElementById('post-image-input').value = ''; }
+    
+    function previewStoryImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedStoryImage = e.target.result;
+                document.getElementById('story-preview-img').src = selectedStoryImage;
+                document.getElementById('story-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    
+    // Submit post
+    async function submitPost() {
+        const caption = document.getElementById('post-caption').value;
+        if (!caption.trim()) { showToast('कैप्शन लिखें'); return; }
+        showToast('पोस्ट हो रही है...');
+        try {
+            const formData = new FormData();
+            formData.append('content', caption);
+            formData.append('category', selectedCategory);
+            const response = await fetch('/social/post', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+                body: formData
+            });
+            const data = await response.json();
+            if (data.success) { showToast('पोस्ट हो गई! 🎉'); closeCreatePost(); location.reload(); }
+        } catch (error) { showToast('त्रुटि'); }
+    }
+    
+    // Submit story
+    async function submitStory() {
+        if (!selectedStoryImage) { showToast('फोटो चुनें'); return; }
+        showToast('स्टोरी हो रही है...');
+        showToast('स्टोरी हो गई!'); closeCreateStory(); location.reload();
+    }
+    
+    // Comments
+    async function submitComment() {
+        const comment = document.getElementById('comment-input').value;
+        if (!comment.trim() || !currentPostId) return;
+        try {
+            const response = await fetch(`/social/post/${currentPostId}/comment`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ comment })
+            });
+            const data = await response.json();
+            if (data.success) { document.getElementById('comment-input').value = ''; showToast('कमेंट हो गया!'); }
+        } catch (error) { showToast('त्रुटि'); }
+    }
+    
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-message').innerText = message;
+        toast.classList.remove('opacity-0', 'translate-y-4');
+        setTimeout(() => toast.classList.add('opacity-0', 'translate-y-4'), 3000);
+    }
+    
+    // Close modals
+    document.querySelectorAll('#create-post-modal, #create-story-modal, #comment-modal, #search-modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) { this.classList.add('hidden'); if (this.id !== 'search-modal') document.body.style.overflow = ''; }
+        });
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeCreatePost(); closeCreateStory(); closeCommentModal();
+            document.getElementById('search-modal').classList.add('hidden');
+        }
+    });
+</script>
+
+@endsection

@@ -23,12 +23,37 @@ class VideoController extends Controller
         $type = $request->get('type', 'all');
         
         // Read videos from JSON file
-        $jsonPath = resource_path('data/videos.json');
+        // Priority: Storage (User edits) -> Resources (Seed)
+        $storagePath = storage_path('data/videos.json');
+        $resourcePath = resource_path('data/videos.json');
+        
+        if (file_exists($storagePath)) {
+            $jsonPath = $storagePath;
+        } else {
+            $jsonPath = $resourcePath;
+        }
+
         $jsonData = file_get_contents($jsonPath);
-        $videosData = json_decode($jsonData, true);
+        $videosData = json_decode($jsonData, true) ?? [];
         
         // Convert arrays to objects for compatibility with the view
         $videos = collect(array_map(function($item) {
+            // Normalize data
+            if (isset($item['title']) && !isset($item['name'])) {
+                $item['name'] = $item['title'];
+            }
+            if (isset($item['video_url']) && !isset($item['link'])) {
+                $item['link'] = $item['video_url'];
+            }
+            if (isset($item['url']) && !isset($item['link'])) {
+                $item['link'] = $item['url'];
+            }
+            if (isset($item['category']) && !isset($item['type'])) {
+                $item['type'] = $item['category'];
+            }
+            if (!isset($item['views_count'])) {
+                $item['views_count'] = rand(1000, 50000);
+            }
             return (object) $item;
         }, $videosData));
         
