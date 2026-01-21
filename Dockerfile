@@ -12,19 +12,8 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
     && docker-php-ext-install pdo_mysql pdo_pgsql zip exif pcntl gd bcmath intl mbstring xml
 
-# Configure and install PHP extensions (including redis)
-RUN docker-php-ext-install \
-        pdo_mysql \
-        pdo_pgsql \
-        zip \
-        exif \
-        pcntl \
-        gd \
-        bcmath \
-        intl \
-        mbstring \
-        xml \
-        redis
+# Install Redis via PECL (it's not a core extension)
+RUN pecl install redis && docker-php-ext-enable redis
 
 # 2. Install Node.js v20
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
