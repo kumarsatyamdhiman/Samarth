@@ -1,5 +1,6 @@
 # ============================================
 # Samarth App - Docker Compose Configuration
+# With MySQL for 1000+ users scalability
 # ============================================
 
 services:
@@ -17,39 +18,47 @@ services:
     networks:
       - samarth-network
     depends_on:
-      - postgres
+      - mysql
     env_file:
       - .env
     environment:
       - APP_ENV=local
+      - DB_CONNECTION=mysql
 
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: samarth-postgres
+  # MySQL 8.0 Database (Optimized for 1000+ users)
+  mysql:
+    image: mysql:8.0
+    container_name: samarth-mysql
+    command: --default-authentication-plugin=mysql_native_password
+              --innodb-buffer-pool-size=256M
+              --innodb-log-file-size=64M
+              --max-connections=500
+              --character-set-server=utf8mb4
+              --collation-server=utf8mb4_unicode_ci
     environment:
-      POSTGRES_DB: samarth
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_ROOT_PASSWORD: samarth_root_pass
+      MYSQL_DATABASE: samarth
+      MYSQL_USER: samarth
+      MYSQL_PASSWORD: samarth_pass
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     networks:
       - samarth-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psamarth_root_pass"]
+      interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis Cache (Optional)
+  # Redis Cache (For sessions and caching - recommended for 1000+ users)
   redis:
     image: redis:7-alpine
     container_name: samarth-redis
     ports:
       - "6379:6379"
-    networks:
       - samarth-network
 
 networks:
@@ -57,5 +66,8 @@ networks:
     driver: bridge
 
 volumes:
+  mysql_data:
+    driver: local
   postgres_data:
+    driver: local
 

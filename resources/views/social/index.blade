@@ -1,0 +1,565 @@
+@extends('layouts.app')
+
+@section('content')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    :root {
+        --dark-bg: #0f0f0f;
+        --dark-card: #1a1a1a;
+        --dark-border: #2a2a2a;
+        --brand-500: #e11d48;
+        --brand-600: #be123c;
+        --text-primary: #ffffff;
+        --text-secondary: #a1a1aa;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .tab-content {
+        display: none;
+        height: calc(100vh - 140px);
+        overflow-y: auto;
+        padding-top: 60px;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    .story-ring {
+        background: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6);
+        padding: 2px;
+        border-radius: 50%;
+    }
+
+    .story-ring.seen {
+        background: #3a3a3a;
+    }
+
+    .heart-burst {
+        animation: heartBurst 0.6s ease-out forwards;
+    }
+
+    @keyframes heartBurst {
+        0% { transform: scale(0) rotate(0deg); opacity: 1; }
+        50% { transform: scale(1.2) rotate(-10deg); opacity: 1; }
+        100% { transform: scale(0) rotate(10deg); opacity: 0; }
+    }
+
+    .heartBeat {
+        animation: heartBeat 0.3s ease-in-out;
+    }
+
+    @keyframes heartBeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+    }
+
+    .msg-sent {
+        background: linear-gradient(135deg, #e11d48, #be123c);
+        border-radius: 18px 18px 4px 18px;
+        padding: 10px 14px;
+    }
+
+    .msg-received {
+        background: #2a2a2a;
+        border-radius: 18px 18px 18px 4px;
+        padding: 10px 14px;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .pt-safe-top {
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .pb-safe-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    #app-frame {
+        background: var(--dark-bg);
+        min-height: 100vh;
+    }
+</style>
+
+<div id="app-frame" class="relative bg-black w-full min-h-screen flex flex-col">
+    
+    <!-- Header -->
+    <div class="absolute top-0 w-full z-40 bg-black/95 backdrop-blur-md border-b border-dark-border pt-safe-top">
+        <div class="px-4 h-14 flex justify-between items-center">
+            <h1 class="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent" style="font-family: cursive;">Samarth</h1>
+            <div class="flex gap-6 items-center">
+                <button class="relative active:scale-90 transition-transform" onclick="alert('Notification Center')">
+                    <i class="far fa-heart text-2xl text-white"></i>
+                    <div class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-black"></div>
+                </button>
+                <button class="relative active:scale-90 transition-transform" onclick="switchTab('chat')">
+                    <i class="fab fa-facebook-messenger text-2xl text-white"></i>
+                    <div class="absolute -top-1 -right-1 bg-red-600 text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-bold">3</div>
+                </button>
+            </div>
+    </div>
+
+    <!-- Tab 1: Home -->
+    <div class="tab-content active" id="tab-home">
+        <div class="flex gap-4 overflow-x-auto px-4 py-2 border-b border-dark-border no-scrollbar mb-2">
+            <div class="flex flex-col items-center gap-1 shrink-0 cursor-pointer group">
+                <div class="w-16 h-16 rounded-full bg-dark-card border border-dark-border relative group-active:scale-95 transition-transform">
+                    @auth
+                        @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                        <img class="w-full h-full rounded-full opacity-50 object-cover" src="{{ auth()->user()->profile->avatar }}">
+                        @else
+                        <img class="w-full h-full rounded-full opacity-50" src="https://ui-avatars.com/api/?name={{ auth()->user()->username }}&background=random">
+                        @endif
+                    @else
+                    <img class="w-full h-full rounded-full opacity-50" src="https://ui-avatars.com/api/?name=Me&background=random">
+                    @endauth
+                    <div class="absolute bottom-0 right-0 bg-blue-500 w-5 h-5 rounded-full flex items-center justify-center border-2 border-black">
+                        <i class="fas fa-plus text-[10px] text-white"></i>
+                    </div>
+                <span class="text-xs text-slate-300">आप</span>
+            </div>
+            <div class="flex gap-4" id="stories-container">
+                <div class="flex flex-col items-center gap-1 shrink-0 cursor-pointer active:opacity-80 transition-opacity">
+                    <div class="w-16 h-16 story-ring p-[2px]">
+                        <img src="https://randomuser.me/api/portraits/men/1.jpg" class="w-full h-full rounded-full border-2 border-black object-cover">
+                    </div>
+                    <span class="text-xs text-white truncate w-16 text-center">Rahul</span>
+                </div>
+                <div class="flex flex-col items-center gap-1 shrink-0 cursor-pointer active:opacity-80 transition-opacity">
+                    <div class="w-16 h-16 story-ring p-[2px]">
+                        <img src="https://randomuser.me/api/portraits/women/2.jpg" class="w-full h-full rounded-full border-2 border-black object-cover">
+                    </div>
+                    <span class="text-xs text-white truncate w-16 text-center">Priya</span>
+                </div>
+                <div class="flex flex-col items-center gap-1 shrink-0 cursor-pointer active:opacity-80 transition-opacity">
+                    <div class="w-16 h-16 story-ring p-[2px]">
+                        <img src="https://ui-avatars.com/api/?name=Code&background=0D8ABC&color=fff" class="w-full h-full rounded-full border-2 border-black object-cover">
+                    </div>
+                    <span class="text-xs text-white truncate w-16 text-center">Coding_Club</span>
+                </div>
+                <div class="flex flex-col items-center gap-1 shrink-0 cursor-pointer active:opacity-80 transition-opacity">
+                    <div class="w-16 h-16 story-ring p-[2px]">
+                        <img src="https://ui-avatars.com/api/?name=Exam&background=ec4899&color=fff" class="w-full h-full rounded-full border-2 border-black object-cover">
+                    </div>
+                    <span class="text-xs text-white truncate w-16 text-center">Exam_Prep</span>
+                </div>
+                <div class="flex flex-col items-center gap-1 shrink-0 cursor-pointer active:opacity-80 transition-opacity">
+                    <div class="w-16 h-16 story-ring p-[2px]">
+                        <img src="https://randomuser.me/api/portraits/women/5.jpg" class="w-full h-full rounded-full border-2 border-black object-cover">
+                    </div>
+                    <span class="text-xs text-white truncate w-16 text-center">Anjali</span>
+                </div>
+        </div>
+
+        <div id="feed-container" class="pb-safe-bottom">
+            <div class="bg-black border-b border-dark-border pb-4 mb-2">
+                <div class="flex justify-between items-center px-3 py-2">
+                    <div class="flex items-center gap-2">
+                        <div class="story-ring p-[1.5px] w-9 h-9">
+                            <img src="https://randomuser.me/api/portraits/men/44.jpg" class="w-full h-full rounded-full border border-black object-cover">
+                        </div>
+                        <span class="font-bold text-sm">Physics_Guru</span>
+                    </div>
+                    <i class="fas fa-ellipsis-h text-sm text-slate-400"></i>
+                </div>
+                <div class="relative w-full aspect-square bg-dark-card" ondblclick="animateHeart(this)">
+                    <img src="https://source.unsplash.com/random/600x600/?physics" class="w-full h-full object-cover">
+                </div>
+                <div class="px-3 pt-3">
+                    <div class="flex justify-between text-2xl mb-2">
+                        <div class="flex gap-4">
+                            <button onclick="toggleLike(this, 0)"><i class="far fa-heart hover:text-slate-400"></i></button>
+                            <button><i class="far fa-comment hover:text-slate-400"></i></button>
+                            <button><i class="far fa-paper-plane hover:text-slate-400"></i></button>
+                        </div>
+                        <button onclick="toggleBookmark(this, 0)"><i class="far fa-bookmark hover:text-slate-400"></i></button>
+                    </div>
+                    <div class="font-bold text-sm mb-1">1,243 likes</div>
+                    <div class="text-sm mb-1"><span class="font-bold">Physics_Guru</span> Important formula sheet for JEE Mains! 📚</div>
+                    <div class="text-slate-500 text-sm mb-1 cursor-pointer">View all 45 comments</div>
+                    <div class="text-[10px] text-slate-500 uppercase">2 hours ago</div>
+            </div>
+            <div class="bg-black border-b border-dark-border pb-4 mb-2">
+                <div class="flex justify-between items-center px-3 py-2">
+                    <div class="flex items-center gap-2">
+                        <div class="story-ring p-[1.5px] w-9 h-9">
+                            <img src="https://randomuser.me/api/portraits/women/65.jpg" class="w-full h-full rounded-full border border-black object-cover">
+                        </div>
+                        <span class="font-bold text-sm">Riya_Codes</span>
+                    </div>
+                    <i class="fas fa-ellipsis-h text-sm text-slate-400"></i>
+                </div>
+                <div class="relative w-full aspect-square bg-dark-card" ondblclick="animateHeart(this)">
+                    <img src="https://source.unsplash.com/random/600x700/?laptop" class="w-full h-full object-cover">
+                </div>
+                <div class="px-3 pt-3">
+                    <div class="flex justify-between text-2xl mb-2">
+                        <div class="flex gap-4">
+                            <button onclick="toggleLike(this, 1)"><i class="far fa-heart hover:text-slate-400"></i></button>
+                            <button><i class="far fa-comment hover:text-slate-400"></i></button>
+                            <button><i class="far fa-paper-plane hover:text-slate-400"></i></button>
+                        </div>
+                        <button onclick="toggleBookmark(this, 1)"><i class="far fa-bookmark hover:text-slate-400"></i></button>
+                    </div>
+                    <div class="font-bold text-sm mb-1">856 likes</div>
+                    <div class="text-sm mb-1"><span class="font-bold">Riya_Codes</span> Finally deployed my first React App! 🚀</div>
+                    <div class="text-slate-500 text-sm mb-1 cursor-pointer">View all 128 comments</div>
+                    <div class="text-[10px] text-slate-500 uppercase">5 hours ago</div>
+            </div>
+    </div>
+
+    <!-- Tab 2: Explore -->
+    <div class="tab-content px-1" id="tab-search">
+        <div class="px-3 pb-3">
+            <div class="relative group">
+                <i class="fas fa-search absolute left-4 top-3 text-slate-500"></i>
+                <input type="text" placeholder="Search" class="w-full bg-dark-card text-white py-2.5 pl-10 pr-4 rounded-xl border border-transparent focus:border-brand-500 focus:outline-none transition-all placeholder-slate-500">
+            </div>
+        <div id="explore-grid" class="grid grid-cols-3 gap-0.5 pb-20">
+            @for($i = 0; $i < 15; $i++)
+            <div class="relative aspect-[3/4] bg-dark-card group overflow-hidden">
+                <img src="https://source.unsplash.com/random/300x400/?education,tech&sig={{ $i }}" class="w-full h-full object-cover">
+                @if($i % 4 === 0)
+                <div class="absolute top-2 right-2 text-white drop-shadow-md"><i class="fas fa-clone"></i></div>
+                @endif
+            </div>
+            @endfor
+        </div>
+
+    <!-- Tab 3: Create -->
+    <div class="tab-content px-4" id="tab-create">
+        <div class="flex justify-between items-center mb-6">
+            <button class="text-lg" onclick="switchTab('home')"><i class="fas fa-times"></i></button>
+            <h2 class="font-bold text-lg">New Post</h2>
+            <button class="text-brand-500 font-bold" onclick="sharePost()">Share</button>
+        </div>
+        <div class="flex gap-3 mb-4">
+            @auth
+                @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                <img src="{{ auth()->user()->profile->avatar }}" class="w-10 h-10 rounded-full">
+                @else
+                <img src="https://ui-avatars.com/api/?name={{ auth()->user()->username }}" class="w-10 h-10 rounded-full">
+                @endif
+            @else
+            <img src="https://ui-avatars.com/api/?name=Me" class="w-10 h-10 rounded-full">
+            @endauth
+            <textarea id="post-caption" class="w-full bg-transparent text-white text-lg focus:outline-none h-32 resize-none placeholder-slate-500" placeholder="Write a caption..."></textarea>
+        </div>
+        <div class="aspect-square bg-dark-card rounded-xl border border-dark-border flex flex-col items-center justify-center text-slate-500 mb-4 cursor-pointer hover:bg-white/5 transition" onclick="document.getElementById('image-input').click()">
+            <i class="fas fa-images text-4xl mb-2"></i>
+            <p class="text-sm font-medium">Select from Gallery</p>
+        </div>
+        <input type="file" id="image-input" accept="image/*" style="display:none" onchange="previewImage(event)">
+        <div id="image-preview" class="hidden aspect-square bg-dark-card rounded-xl border border-dark-border mb-4 overflow-hidden relative">
+            <img id="preview-img" src="" class="w-full h-full object-cover">
+            <button onclick="removeImage()" class="absolute top-2 right-2 bg-black/50 rounded-full p-1 text-white">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="divide-y divide-dark-border border-t border-b border-dark-border">
+            <button class="w-full py-4 flex justify-between items-center text-left">
+                <span class="text-base">Tag People</span>
+                <i class="fas fa-chevron-right text-slate-500"></i>
+            </button>
+            <button class="w-full py-4 flex justify-between items-center text-left">
+                <span class="text-base">Add Location</span>
+                <i class="fas fa-chevron-right text-slate-500"></i>
+            </button>
+            <button class="w-full py-4 flex justify-between items-center text-left">
+                <span class="text-base">Add Music</span>
+                <i class="fas fa-chevron-right text-slate-500"></i>
+            </button>
+        </div>
+
+    <!-- Tab 4: Chat -->
+    <div class="tab-content px-0" id="tab-chat">
+        <div class="px-4 mb-4">
+            <div class="relative">
+                <i class="fas fa-search absolute left-4 top-3 text-slate-500"></i>
+                <input type="text" placeholder="Search messages" class="w-full bg-dark-card text-white py-2 pl-10 pr-4 rounded-xl focus:outline-none">
+            </div>
+        <h3 class="px-4 font-bold text-base mb-2">Messages</h3>
+        <div id="messages-list" class="pb-20">
+            <div class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 cursor-pointer active:bg-white/10" onclick="openChat('Rahul Sharma', 'https://randomuser.me/api/portraits/men/1.jpg')">
+                <div class="relative">
+                    <img src="https://randomuser.me/api/portraits/men/1.jpg" class="w-14 h-14 rounded-full border border-dark-border object-cover">
+                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-black rounded-full"></div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate">Rahul Sharma</h4>
+                    <div class="flex items-center gap-1 text-slate-400 text-sm">
+                        <p class="truncate text-slate-300">Notes bhej de bhai pls?</p>
+                        <span>·</span>
+                        <span>2m ago</span>
+                    </div>
+                <i class="far fa-camera text-slate-400 text-xl"></i>
+            </div>
+            <div class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 cursor-pointer active:bg-white/10" onclick="openChat('Study Group', 'https://ui-avatars.com/api/?name=SG&background=random')">
+                <div class="relative">
+                    <img src="https://ui-avatars.com/api/?name=SG&background=random" class="w-14 h-14 rounded-full border border-dark-border object-cover">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate">Study Group 📚</h4>
+                    <div class="flex items-center gap-1 text-slate-400 text-sm">
+                        <p class="truncate text-slate-300">Meeting at 8 PM.</p>
+                        <span>·</span>
+                        <span>1h ago</span>
+                    </div>
+                <i class="far fa-camera text-slate-400 text-xl"></i>
+            </div>
+            <div class="flex items-center gap-3 px-4 py-2 hover:bg-white/5 cursor-pointer active:bg-white/10" onclick="openChat('Priya Singh', 'https://randomuser.me/api/portraits/women/2.jpg')">
+                <div class="relative">
+                    <img src="https://randomuser.me/api/portraits/women/2.jpg" class="w-14 h-14 rounded-full border border-dark-border object-cover">
+                    <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-black rounded-full"></div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate">Priya Singh</h4>
+                    <div class="flex items-center gap-1 text-slate-400 text-sm">
+                        <p class="truncate text-slate-300">Thanks for the help!</p>
+                        <span>·</span>
+                        <span>4h ago</span>
+                    </div>
+                <i class="far fa-camera text-slate-400 text-xl"></i>
+            </div>
+    </div>
+
+    <!-- Tab 5: Profile -->
+    <div class="tab-content px-0" id="tab-profile">
+        <div class="px-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold flex items-center gap-1">{{ auth()->user()->username ?? 'guest_user' }} <i class="fas fa-chevron-down text-xs"></i></h2>
+                <div class="flex gap-4 text-xl">
+                    <i class="far fa-plus-square"></i>
+                    <i class="fas fa-bars"></i>
+                </div>
+            <div class="flex items-center justify-between mb-4">
+                @auth
+                    @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                    <div class="w-20 h-20 story-ring p-[2px] shrink-0">
+                        <img src="{{ auth()->user()->profile->avatar }}" class="w-full h-full rounded-full border-2 border-black object-cover">
+                    </div>
+                    @else
+                    <div class="w-20 h-20 story-ring p-[2px] shrink-0">
+                        <img src="https://ui-avatars.com/api/?name={{ auth()->user()->username }}&background=random" class="w-full h-full rounded-full border-2 border-black object-cover">
+                    </div>
+                    @endif
+                @else
+                <div class="w-20 h-20 story-ring p-[2px] shrink-0">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-full h-full rounded-full border-2 border-black object-cover">
+                </div>
+                @endauth
+                <div class="flex flex-1 justify-around text-center ml-4">
+                    <div><div class="font-bold text-lg">12</div><div class="text-xs">Posts</div>
+                    <div><div class="font-bold text-lg">850</div><div class="text-xs">Followers</div>
+                    <div><div class="font-bold text-lg">450</div><div class="text-xs">Following</div>
+                </div>
+            <div class="mb-4">
+                <h3 class="font-bold">{{ auth()->user()->username ?? 'Guest User' }}</h3>
+                <p class="text-sm text-slate-200">🎓 Student | Future Dev 🚀</p>
+                <p class="text-sm text-blue-400 font-medium">🔗 github.com/{{ auth()->user()->username ?? 'user' }}</p>
+            </div>
+            <div class="flex gap-2 mb-6">
+                <button class="flex-1 bg-dark-card py-1.5 rounded-lg font-bold text-sm border border-dark-border active:bg-white/10">Edit Profile</button>
+                <button class="flex-1 bg-dark-card py-1.5 rounded-lg font-bold text-sm border border-dark-border active:bg-white/10">Share Profile</button>
+                <button class="bg-dark-card p-1.5 rounded-lg border border-dark-border w-9 flex items-center justify-center"><i class="fas fa-user-plus"></i></button>
+            </div>
+            <div class="flex gap-4 overflow-x-auto no-scrollbar mb-4 pb-2">
+                <div class="flex flex-col items-center gap-1 shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-dark-card border border-dark-border flex items-center justify-center">
+                        <i class="fas fa-code text-blue-400 text-xl"></i>
+                    </div>
+                    <span class="text-xs">Coding</span>
+                </div>
+                <div class="flex flex-col items-center gap-1 shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-dark-card border border-dark-border flex items-center justify-center">
+                        <i class="fas fa-certificate text-yellow-400 text-xl"></i>
+                    </div>
+                    <span class="text-xs">Certs</span>
+                </div>
+                <div class="flex flex-col items-center gap-1 shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-dark-card border border-dark-border flex items-center justify-center">
+                        <i class="fas fa-plus text-slate-500 text-xl"></i>
+                    </div>
+                    <span class="text-xs">New</span>
+                </div>
+        </div>
+        <div class="flex border-t border-dark-border mt-2 sticky top-14 bg-black z-10">
+            <button class="flex-1 py-3 border-b-2 border-white"><i class="fas fa-th"></i></button>
+            <button class="flex-1 py-3 text-slate-500"><i class="fas fa-id-badge"></i></button>
+        </div>
+        <div class="grid grid-cols-3 gap-0.5 pb-20">
+            <div class="aspect-square bg-dark-card"><img src="https://source.unsplash.com/random/300x300/?tech" class="w-full h-full object-cover"></div>
+            <div class="aspect-square bg-dark-card"><img src="https://source.unsplash.com/random/300x300/?code" class="w-full h-full object-cover"></div>
+            <div class="aspect-square bg-dark-card"><img src="https://source.unsplash.com/random/300x300/?study" class="w-full h-full object-cover"></div>
+            <div class="aspect-square bg-dark-card"><img src="https://source.unsplash.com/random/300x300/?books" class="w-full h-full object-cover"></div>
+            <div class="aspect-square bg-dark-card"><img src="https://source.unsplash.com/random/300x300/?laptop" class="w-full h-full object-cover"></div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="absolute bottom-0 w-full bg-black border-t border-dark-border pb-safe-bottom z-50">
+        <div class="flex justify-around items-center h-12">
+            <button class="nav-btn text-white active:scale-90 transition-transform" onclick="switchTab('home')">
+                <i class="fas fa-home text-2xl"></i>
+            </button>
+            <button class="nav-btn text-slate-500 active:scale-90 transition-transform" onclick="switchTab('search')">
+                <i class="fas fa-search text-2xl"></i>
+            </button>
+            <button class="nav-btn text-slate-500 active:scale-90 transition-transform" onclick="switchTab('create')">
+                <i class="far fa-plus-square text-2xl"></i>
+            </button>
+            <button class="nav-btn text-slate-500 active:scale-90 transition-transform" onclick="switchTab('chat')">
+                <i class="fab fa-rocketchat text-2xl"></i>
+            </button>
+            <button class="nav-btn text-slate-500 active:scale-90 transition-transform" onclick="switchTab('profile')">
+                @auth
+                    @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                    <img src="{{ auth()->user()->profile->avatar }}" class="w-6 h-6 rounded-full border border-slate-500 object-cover">
+                    @else
+                    <img src="https://ui-avatars.com/api/?name={{ auth()->user()->username }}&background=random" class="w-6 h-6 rounded-full border border-slate-500">
+                    @endif
+                @else
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" class="w-6 h-6 rounded-full border border-slate-500 object-cover">
+                @endauth
+            </button>
+        </div>
+
+    <!-- Heart Animation Layer -->
+    <div id="heart-layer" class="absolute inset-0 z-50 pointer-events-none flex items-center justify-center hidden">
+        <i class="fas fa-heart text-white text-8xl drop-shadow-2xl heart-burst text-red-600"></i>
+    </div>
+
+    <!-- Chat Window -->
+    <div id="active-chat" class="absolute inset-0 bg-black z-[60] flex flex-col hidden transform transition-transform duration-300 translate-x-full">
+        <div class="px-4 h-16 border-b border-dark-border flex items-center gap-3 bg-black/95 backdrop-blur pt-safe-top shrink-0">
+            <button onclick="closeChat()" class="p-2 -ml-2"><i class="fas fa-arrow-left text-xl"></i></button>
+            <div class="relative">
+                <img id="chat-header-img" src="" class="w-8 h-8 rounded-full">
+                <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-black rounded-full"></div>
+            <div class="flex-1">
+                <h3 id="chat-header-name" class="font-bold text-sm">User</h3>
+                <p class="text-[10px] text-slate-400">Active now</p>
+            </div>
+            <div class="flex gap-4 text-xl text-brand-500">
+                <i class="fas fa-phone"></i>
+                <i class="fas fa-video"></i>
+            </div>
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2 pb-20">
+            <div class="flex justify-end mb-2">
+                <div class="msg-sent text-white px-4 py-2 text-sm max-w-[75%]">Hi! Saw you were studying. Can we connect?</div>
+            <div class="flex justify-start mb-2">
+                <img id="chat-avatar-img" src="" class="w-7 h-7 rounded-full mr-2 self-end">
+                <div class="msg-received text-white px-4 py-2 text-sm max-w-[75%]">Hey! Sure, I'd love to help.</div>
+        </div>
+        <div class="p-3 border-t border-dark-border flex items-center gap-3 bg-black pb-safe-bottom shrink-0">
+            <div class="w-10 h-10 rounded-full bg-dark-card flex items-center justify-center text-brand-500">
+                <i class="fas fa-camera"></i>
+            </div>
+            <input type="text" id="chat-input" placeholder="Message..." class="flex-1 bg-dark-card rounded-full py-2.5 px-4 focus:outline-none border border-transparent focus:border-dark-border text-white">
+            <button onclick="sendChatMessage()" class="font-bold text-brand-500 px-2">Send</button>
+        </div>
+
+</div>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.replace('text-white', 'text-slate-500'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        const mapping = { 'home': 0, 'search': 1, 'create': 2, 'chat': 3, 'profile': 4 };
+        if(mapping[tabId] !== undefined) {
+            document.querySelectorAll('.nav-btn')[mapping[tabId]].classList.replace('text-slate-500', 'text-white');
+        }
+        document.getElementById('app-frame').scrollTop = 0;
+    }
+
+    function animateHeart(container) {
+        const overlay = document.getElementById('heart-layer');
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.add('hidden'), 800);
+        const btn = container.parentElement.querySelector('.far.fa-heart');
+        if(btn) {
+            btn.className = "fas fa-heart text-red-500 animated heartBeat";
+        }
+    }
+
+    function toggleLike(btn, index) {
+        const icon = btn.querySelector('i');
+        if(icon.classList.contains('far')) {
+            icon.className = "fas fa-heart text-red-500 animate__animated animate__heartBeat";
+        } else {
+            icon.className = "far fa-heart hover:text-slate-400";
+        }
+    }
+
+    function toggleBookmark(btn, index) {
+        const icon = btn.querySelector('i');
+        icon.classList.toggle('fas');
+        icon.classList.toggle('far');
+    }
+
+    function openChat(name, img) {
+        const chatWin = document.getElementById('active-chat');
+        document.getElementById('chat-header-name').innerText = name;
+        document.getElementById('chat-header-img').src = img;
+        document.getElementById('chat-avatar-img').src = img;
+        chatWin.classList.remove('hidden');
+        setTimeout(() => chatWin.classList.remove('translate-x-full'), 10);
+    }
+
+    function closeChat() {
+        const chatWin = document.getElementById('active-chat');
+        chatWin.classList.add('translate-x-full');
+        setTimeout(() => chatWin.classList.add('hidden'), 300);
+    }
+
+    function sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        if(message) {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML += `<div class="flex justify-end mb-2"><div class="msg-sent text-white px-4 py-2 text-sm max-w-[75%]">${message}</div>`;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+
+    function sharePost() {
+        alert('Post shared successfully! 🚀');
+        switchTab('home');
+    }
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-img').src = e.target.result;
+                document.getElementById('image-preview').classList.remove('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removeImage() {
+        document.getElementById('image-preview').classList.add('hidden');
+        document.getElementById('image-input').value = '';
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if(e.key === 'Enter' && document.activeElement.id === 'chat-input') {
+            sendChatMessage();
+        }
+    });
+</script>
+@endsection

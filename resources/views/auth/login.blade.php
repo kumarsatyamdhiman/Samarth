@@ -226,7 +226,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login.submit') }}">
+        <form method="POST" action="{{ route('login') }}">
             @csrf
             
             <div class="relative mb-4">
@@ -246,7 +246,7 @@
                 <label class="flex items-center gap-2 cursor-pointer hover:text-white transition-colors">
                     <input type="checkbox" class="accent-orange-500 rounded"> Remember me
                 </label>
-                <a href="{{ route('password.security.request') }}" class="hover:text-orange-400 transition-colors">Forgot Password?</a>
+<a href="{{ route('password.recovery') }}" class="hover:text-orange-400 transition-colors">Forgot Password?</a>
             </div>
 
             <button type="submit" class="magic-btn w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide mb-6 shadow-lg">
@@ -256,7 +256,7 @@
         </form>
 
         <div class="grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
-            <a href="{{ route('public.goals') }}" class="outline-btn w-full py-3 rounded-xl text-white text-xs font-bold text-center uppercase tracking-wide">
+            <a href="{{ route('goals.index') }}" class="outline-btn w-full py-3 rounded-xl text-white text-xs font-bold text-center uppercase tracking-wide">
                 Guest Mode
             </a>
             <a href="{{ route('register.show') }}" class="outline-btn w-full py-3 rounded-xl text-white text-xs font-bold text-center uppercase tracking-wide">

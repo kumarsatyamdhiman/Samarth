@@ -109,11 +109,15 @@
         <!-- Video Area -->
         <div class="flex-1 flex items-center justify-center p-8 relative overflow-hidden">
             <!-- Real Video Player -->
-            <video id="mainVideoPlayer" class="w-full max-w-lg max-h-full rounded-3xl shadow-2xl hidden" 
-                   controls controlsList="nodownload" preload="metadata" playsinline webkit-playsinline muted>
-                <source src="" type="video/mp4">
-                आपका ब्राउज़र वीडियो सपोर्ट नहीं करता।
-            </video>
+            <div id="videoContainerFrame" class="w-full max-w-lg aspect-video rounded-3xl shadow-2xl hidden relative bg-black">
+                <video id="mainVideoPlayer" class="w-full h-full rounded-3xl hidden" 
+                       controls controlsList="nodownload" preload="metadata" playsinline webkit-playsinline>
+                    <source src="" type="video/mp4">
+                </video>
+                <iframe id="youtubePlayer" class="w-full h-full rounded-3xl hidden" 
+                        src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                </iframe>
+            </div>
             
             <!-- Poster Layer -->
             <div id="posterLayer" class="absolute inset-0 max-w-lg max-h-full flex items-center justify-center bg-cover bg-center cursor-pointer">
@@ -303,6 +307,8 @@ const videoGallery = {
     
     playSelectedVideo() {
         const video = this.videoPlayer;
+        const iframe = document.getElementById('youtubePlayer');
+        const container = document.getElementById('videoContainerFrame');
         const poster = document.getElementById('posterLayer');
         const spinner = document.getElementById('loadingSpinner');
         const playBtn = document.getElementById('mainPlayBtn');
@@ -311,27 +317,63 @@ const videoGallery = {
         spinner.classList.remove('hidden');
         poster.style.opacity = '0.5';
         
-        // Load video
-        video.src = this.currentVideo.link;
-        video.load();
+        const link = this.currentVideo.link;
+        const isYoutube = link.includes('youtube.com') || link.includes('youtu.be');
         
-        video.onloadeddata = () => {
-            spinner.classList.add('hidden');
-            poster.classList.add('hidden');
+        container.classList.remove('hidden');
+        
+        if (isYoutube) {
+            // Extract Video ID
+            let videoId = '';
+            if (link.includes('youtu.be')) {
+                videoId = link.split('youtu.be/')[1];
+            } else if (link.includes('v=')) {
+                videoId = link.split('v=')[1].split('&')[0];
+            } else if (link.includes('/embed/')) {
+                videoId = link.split('/embed/')[1];
+            }
+            
+            // Clean ID if query params exist
+            if (videoId.indexOf('?') !== -1) videoId = videoId.split('?')[0];
+
+            video.classList.add('hidden');
+            iframe.classList.remove('hidden');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+            
+            // Fake loading state completion for iframe (since we can't easily detect load)
+            setTimeout(() => {
+                spinner.classList.add('hidden');
+                poster.classList.add('hidden');
+                playBtn.innerHTML = '<span class="material-symbols-rounded text-4xl">pause_circle</span>रोकें';
+            }, 1000);
+            
+        } else {
+            // MP4 Playback
+            iframe.classList.add('hidden');
+            iframe.src = ''; // Stop iframe
+            
             video.classList.remove('hidden');
-            video.play();
-            playBtn.innerHTML = '<span class="material-symbols-rounded text-4xl">pause_circle</span>रोकें';
-        };
-        
-        video.onerror = () => {
-            spinner.classList.add('hidden');
-            this.showToast('वीडियो लोड नहीं हो सका', 'error');
-        };
+            video.src = link;
+            video.load();
+            
+            video.onloadeddata = () => {
+                spinner.classList.add('hidden');
+                poster.classList.add('hidden');
+                video.play();
+                playBtn.innerHTML = '<span class="material-symbols-rounded text-4xl">pause_circle</span>रोकें';
+            };
+            
+            video.onerror = () => {
+                spinner.classList.add('hidden');
+                this.showToast('वीडियो लोड नहीं हो सका', 'error');
+            };
+        }
     },
     
     closeModal() {
         this.videoPlayer.pause();
         this.videoPlayer.src = '';
+        document.getElementById('youtubePlayer').src = ''; // Stop YouTube
         document.getElementById('videoModal').classList.add('hidden');
         document.body.style.overflow = '';
     },

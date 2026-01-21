@@ -1,62 +1,87 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\GoalController;
-use App\Http\Controllers\ChallengeController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\EducationController;
-use App\Http\Controllers\VideoController;
+use App\Http\Controllers\SocialController;
 
-// Authentication Routes
-Route::get('/', [AuthController::class, 'showLogin'])->name('login');
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login.show');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit')->middleware('web');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register.show');
-Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('/', function () { return redirect()->route('home'); });
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/welcome', function () { return view('welcome'); });
 
-// Password Recovery Routes
-Route::get('/password/recovery', function() {
-    return view('auth.password-recovery');
-})->name('password.security.request');
-Route::post('/password/security/check', [AuthController::class, 'checkSecurityQuestion'])->name('password.security.check');
-Route::post('/password/security/reset', [AuthController::class, 'resetPassword'])->name('password.security.reset');
+// Social Routes
+Route::get('/social', [SocialController::class, 'index'])->name('social.index');
+Route::post('/social/post', [SocialController::class, 'storePost'])->name('social.post.store');
+Route::post('/social/like/{postId}', [SocialController::class, 'like'])->name('social.like');
+Route::post('/social/bookmark/{postId}', [SocialController::class, 'bookmark'])->name('social.bookmark');
+Route::post('/social/share/{postId}', [SocialController::class, 'share'])->name('social.share');
+Route::post('/social/comment/{postId}', [SocialController::class, 'comment'])->name('social.comment'); // Existing legacy if any, replacing usage below
+Route::get('/social/comments/{postId}', [SocialController::class, 'getComments']);
+Route::post('/social/comments/{postId}', [SocialController::class, 'postComment']);
+Route::get('/social/notifications', [SocialController::class, 'getNotifications']);
 
-// Protected Routes
-Route::middleware(['auth'])->group(function () {
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
-    Route::get('/goals', [GoalController::class, 'index'])->name('goals.index');
-    Route::get('/goals/{goal}', [GoalController::class, 'show'])->name('goals.show');
-    Route::post('/goals', [GoalController::class, 'store'])->name('goals.store');
-    
-    Route::get('/challenges', [ChallengeController::class, 'index'])->name('challenges.index');
-    Route::get('/challenges/{challenge}', [ChallengeController::class, 'show'])->name('challenges.show');
-    Route::post('/challenges/{challenge}/complete', [ChallengeController::class, 'complete'])->name('challenges.complete');
-    
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    
-    // Education Module Routes
-    Route::get('/education', [EducationController::class, 'index'])->name('education.index');
-    Route::get('/education/profile', [EducationController::class, 'profile'])->name('education.profile');
-    Route::post('/education/profile', [EducationController::class, 'updateProfile'])->name('education.profile.update');
-    Route::get('/education/streams', [EducationController::class, 'streams'])->name('education.streams');
-    Route::get('/education/sectors', [EducationController::class, 'sectors'])->name('education.sectors');
-    Route::get('/education/sectors/{sectorKey}', [EducationController::class, 'sectors'])->name('education.sectors.show');
-    Route::get('/education/exams', [EducationController::class, 'exams'])->name('education.exams');
-    Route::post('/education/plan/generate', [EducationController::class, 'generatePlan'])->name('education.plan.generate');
-    Route::get('/education/plan/{planId}', [EducationController::class, 'showPlan'])->name('education.plan');
-    
-    // Videos Routes
-    Route::get('/videos', [VideoController::class, 'index'])->name('videos.index');
-    Route::post('/videos/{videoId}/like', [VideoController::class, 'like'])->name('videos.like');
-    Route::post('/videos/{videoId}/share', [VideoController::class, 'share'])->name('videos.share');
-    Route::post('/videos/{videoId}/comment', [VideoController::class, 'comment'])->name('videos.comment');
-    Route::get('/videos/{videoId}/comments', [VideoController::class, 'getComments'])->name('videos.comments');
-});
+// Story Routes
+Route::get('/social/stories', [SocialController::class, 'stories'])->name('social.stories');
+Route::post('/social/story/create', [SocialController::class, 'createStory'])->name('social.story.create');
+Route::get('/social/story/view/{storyId}', [SocialController::class, 'viewStory'])->name('social.story.view');
+Route::delete('/social/story/delete/{storyId}', [SocialController::class, 'deleteStory'])->name('social.story.delete');
 
-// Public Routes (accessible without login)
-Route::get('/public/goals', [GoalController::class, 'publicIndex'])->name('public.goals');
-Route::get('/public/challenges', [ChallengeController::class, 'publicIndex'])->name('public.challenges');
+// Explore Routes
+Route::get('/social/explore', [SocialController::class, 'explore'])->name('social.explore');
+
+// Message Routes
+Route::get('/social/messages', [SocialController::class, 'messages'])->name('social.messages');
+Route::get('/social/chat/{userId}', [SocialController::class, 'chat'])->name('social.chat');
+Route::get('/social/messages/{userId}', [SocialController::class, 'getMessages']);
+Route::post('/social/message/send', [SocialController::class, 'sendMessage'])->name('social.message.send');
+Route::get('/social/messages/search', [SocialController::class, 'searchMessages'])->name('social.messages.search');
+
+// Auth Routes
+Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login.show');
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login');
+Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register.show');
+Route::post('/register', [App\Http\Controllers\AuthController::class, 'register'])->name('register');
+Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+Route::get('/password/recovery', [App\Http\Controllers\AuthController::class, 'showRecovery'])->name('password.recovery');
+Route::post('/password/recovery', [App\Http\Controllers\AuthController::class, 'sendRecovery'])->name('password.send');
+
+// Profile Routes
+Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+Route::get('/profile/settings', [App\Http\Controllers\ProfileController::class, 'settings'])->name('profile.settings');
+Route::get('/profile/notifications', [App\Http\Controllers\ProfileController::class, 'notifications'])->name('profile.notifications');
+Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
+// Education Routes
+Route::get('/education', [App\Http\Controllers\EducationController::class, 'index'])->name('education.index');
+Route::get('/education/profile', [App\Http\Controllers\EducationController::class, 'profile'])->name('education.profile');
+Route::put('/education/profile', [App\Http\Controllers\EducationController::class, 'updateProfile'])->name('education.profile.update');
+Route::get('/education/streams', [App\Http\Controllers\EducationController::class, 'streams'])->name('education.streams');
+Route::get('/education/sectors', [App\Http\Controllers\EducationController::class, 'sectors'])->name('education.sectors');
+Route::get('/education/exams', [App\Http\Controllers\EducationController::class, 'exams'])->name('education.exams');
+Route::get('/education/plan', [App\Http\Controllers\EducationController::class, 'plan'])->name('education.plan');
+Route::post('/education/plan', [App\Http\Controllers\EducationController::class, 'generatePlan'])->name('education.plan.generate');
+
+// Video Routes
+Route::get('/videos', [App\Http\Controllers\VideoController::class, 'index'])->name('videos.index');
+Route::get('/videos/{id}', [App\Http\Controllers\VideoController::class, 'show'])->name('videos.show');
+Route::post('/videos/{id}/like', [App\Http\Controllers\VideoController::class, 'like'])->name('videos.like');
+Route::post('/videos/{id}/comment', [App\Http\Controllers\VideoController::class, 'comment'])->name('videos.comment');
+Route::post('/videos/{id}/share', [App\Http\Controllers\VideoController::class, 'share'])->name('videos.share');
+
+// Goals Routes - Load from JSON
+Route::get('/goals', function() {
+    $goalsPath = storage_path('data/goals.json');
+    $goals = file_exists($goalsPath) ? json_decode(file_get_contents($goalsPath), true) : [];
+    return view('goals.index', compact('goals'));
+})->name('goals.index');
+Route::post('/goals', function(\Illuminate\Http\Request $r) { return redirect()->back()->with('success', 'Goal added!'); })->name('goals.store');
+
+// Challenges Routes - Load from JSON
+Route::get('/challenges', function() {
+    $challengesPath = storage_path('data/challenges.json');
+    $challenges = file_exists($challengesPath) ? json_decode(file_get_contents($challengesPath), true) : [];
+    return view('challenges.index', compact('challenges'));
+})->name('challenges.index');

@@ -1,0 +1,36 @@
+[
+    {
+        "username": "akash_student",
+        "full_name": "Akash Kumar",
+        "avatar": "https:\/\/randomuser.me\/api\/portraits\/men\/32.jpg",
+        "bio": "CSE Student | Future Dev | 🇮🇳",
+        "followers": 850,
+        "following": 450,
+        "is_current_user": true,
+        "id": 1,
+        "created_at": "2026-01-21T09:06:00.519653Z",
+        "updated_at": "2026-01-21T09:06:00.519893Z"
+    },
+    {
+        "username": "Physics_Guru",
+        "full_name": "Rajesh Sir",
+        "avatar": "https:\/\/randomuser.me\/api\/portraits\/men\/44.jpg",
+        "bio": "Physics HOD | JEE Expert",
+        "followers": 15000,
+        "following": 12,
+        "id": 2,
+        "created_at": "2026-01-21T09:06:00.522081Z",
+        "updated_at": "2026-01-21T09:06:00.522135Z"
+    },
+    {
+        "username": "Riya_Codes",
+        "full_name": "Riya Sharma",
+        "avatar": "https:\/\/randomuser.me\/api\/portraits\/women\/65.jpg",
+        "bio": "React Developer | Open Source",
+        "followers": 1200,
+        "following": 300,
+        "id": 3,
+        "created_at": "2026-01-21T09:06:00.523847Z",
+        "updated_at": "2026-01-21T09:06:00.523902Z"
+    }
+]
