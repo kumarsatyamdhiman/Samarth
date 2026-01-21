@@ -63,5 +63,5 @@ RUN touch /var/www/html/database/database.sqlite \
 
 # 9. STARTUP COMMAND (The Port Fix)
 # This replaces port 80 with the Render $PORT variable right before the server starts.
-CMD ["/bin/bash", "-c", "sed -i \"s/80/$PORT/g\" /etc/apache2/sites-available/000-default.conf && sed -i \"s/80/$PORT/g\" /etc/apache2/ports.conf && php artisan config:cache && apache2-foreground"]
+CMD ["/bin/bash", "-c", "sed -i \"s/80/$PORT/g\" /etc/apache2/sites-available/000-default.conf && sed -i \"s/80/$PORT/g\" /etc/apache2/ports.conf && php artisan config:cache && php artisan migrate --force --seed && apache2-foreground"]
 
