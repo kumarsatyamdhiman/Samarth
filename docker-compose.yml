@@ -1,8 +1,3 @@
-# ============================================
-# Samarth App - Docker Compose Configuration
-# With MySQL for 1000+ users scalability
-# ============================================
-
 services:
   # Apache + PHP Application
   app:
@@ -29,12 +24,13 @@ services:
   mysql:
     image: mysql:8.0
     container_name: samarth-mysql
-    command: --default-authentication-plugin=mysql_native_password
-              --innodb-buffer-pool-size=256M
-              --innodb-log-file-size=64M
-              --max-connections=500
-              --character-set-server=utf8mb4
-              --collation-server=utf8mb4_unicode_ci
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --innodb-buffer-pool-size=256M
+      --innodb-log-file-size=64M
+      --max-connections=500
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_ROOT_PASSWORD: samarth_root_pass
       MYSQL_DATABASE: samarth
@@ -59,6 +55,7 @@ services:
     container_name: samarth-redis
     ports:
       - "6379:6379"
+    networks:
       - samarth-network
 
 networks:
@@ -70,4 +67,3 @@ volumes:
     driver: local
   postgres_data:
     driver: local
-
