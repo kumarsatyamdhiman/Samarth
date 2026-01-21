@@ -318,4 +318,10 @@ class EducationController extends Controller
             return $message;
         }
     }
+    public function plan()
+    {
+        $user = Auth::user();
+        $plans = UserEducationPlan::where('user_id', $user->id)->get();
+        return view('education.plan', compact('plans'));
+    }
 }

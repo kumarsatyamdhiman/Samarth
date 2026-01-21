@@ -202,5 +202,10 @@ class VideoController extends Controller
             'comments' => $comments
         ]);
     }
+    public function show($id)
+    {
+        // Fallback to index with specific video highlighted or just redirect
+        return redirect()->route('videos.index');
+    }
 }
 
