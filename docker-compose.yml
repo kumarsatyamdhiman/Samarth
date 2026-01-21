@@ -36,8 +36,8 @@ services:
       MYSQL_DATABASE: samarth
       MYSQL_USER: samarth
       MYSQL_PASSWORD: samarth_pass
-    ports:
-      - "3306:3306"
+    #ports:
+    # - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d
