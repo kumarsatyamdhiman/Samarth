@@ -20,6 +20,10 @@ class EducationController extends Controller
     public function index()
     {
         $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
         
         // Get or create user's education profile
         $profile = UserEducationProfile::firstOrCreate(
@@ -317,5 +321,11 @@ class EducationController extends Controller
             
             return $message;
         }
+    }
+    public function plan()
+    {
+        $user = Auth::user();
+        $plans = UserEducationPlan::where('user_id', $user->id)->get();
+        return view('education.plan', compact('plans'));
     }
 }

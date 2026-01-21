@@ -135,7 +135,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register.submit') }}">
+        <form method="POST" action="{{ route('register') }}">
             @csrf
 
             <div class="neon-text"><i class="fas fa-id-card text-pink-500"></i> Identity</div>

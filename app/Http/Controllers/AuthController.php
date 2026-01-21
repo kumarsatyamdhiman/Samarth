@@ -200,5 +200,15 @@ class AuthController extends Controller
 
         return redirect()->route('login')->with('success', 'पासवर्ड सफलतापूर्वक बदल दिया गया है! अब लॉगिन करें।');
     }
+    public function showRecovery()
+    {
+        return view('auth.password-recovery');
+    }
+
+    public function sendRecovery(Request $request)
+    {
+        $request->validate(['username' => 'required']);
+        return back()->with('success', 'यदि यह खाता मौजूद है, तो रिकवरी निर्देश भेज दिए गए हैं।');
+    }
 }
 

@@ -380,7 +380,7 @@
                 @auth
                     @php
                         $user = auth()->user();
-                        $displayName = $user->profile && $user->profile->display_name ? $user->profile->display_name : $user->username;
+                        $displayName = optional($user)->profile && $user->profile->display_name ? $user->profile->display_name : optional($user)->username;
                         $hour = date('H');
                         $greeting = $hour < 12 ? 'सुप्रभात' : ($hour < 17 ? 'नमस्ते' : 'शुभ संध्या');
                     @endphp
@@ -437,12 +437,7 @@
             @yield('content')
         </main>
 
-        <!-- FAB Button -->
-        <div class="fixed bottom-24 right-4 z-40 max-w-md mx-auto w-full flex justify-end pr-4 pointer-events-none">
-            <button onclick="location.href='{{ route('goals.store') }}'" class="fab pointer-events-auto w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
-                <i class="fas fa-plus"></i>
-            </button>
-        </div>
+        <!-- FAB Button Removed -->
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav fixed bottom-0 w-full max-w-md z-50 flex justify-around items-center py-3 px-2">
@@ -470,7 +465,7 @@
                         <img src="{{ auth()->user()->profile->avatar }}" class="w-7 h-7 rounded-full border-2 border-earth-saffron object-cover">
                     @else
                         <div class="w-7 h-7 rounded-full bg-gradient-to-br from-earth-saffron to-orange-500 flex items-center justify-center text-white text-sm font-bold">
-                            {{ substr(auth()->user()->username, 0, 1) }}
+                            {{ substr(optional(auth()->user())->username ?? 'U', 0, 1) }}
                         </div>
                     @endif
                 @else
