@@ -437,12 +437,7 @@
             @yield('content')
         </main>
 
-        <!-- FAB Button -->
-        <div class="fixed bottom-24 right-4 z-40 max-w-md mx-auto w-full flex justify-end pr-4 pointer-events-none">
-            <button onclick="location.href='{{ route('goals.store') }}'" class="fab pointer-events-auto w-14 h-14 rounded-full flex items-center justify-center text-white text-2xl shadow-lg">
-                <i class="fas fa-plus"></i>
-            </button>
-        </div>
+        <!-- FAB Button Removed -->
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav fixed bottom-0 w-full max-w-md z-50 flex justify-around items-center py-3 px-2">
