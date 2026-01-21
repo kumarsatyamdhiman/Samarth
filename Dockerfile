@@ -8,9 +8,9 @@ FROM php:8.2-apache-bookworm
 # 1. Install Dependencies
 RUN apt-get update && apt-get install -y \
     git unzip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
-    libxml2-dev libonig-dev libpq-dev curl gnupg \
+    libxml2-dev libonig-dev libpq-dev libsqlite3-dev curl gnupg \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
-    && docker-php-ext-install pdo_mysql pdo_pgsql zip exif pcntl gd bcmath intl mbstring xml
+    && docker-php-ext-install pdo_mysql pdo_pgsql pdo_sqlite zip exif pcntl gd bcmath intl mbstring xml
 
 # Install Redis via PECL (it's not a core extension)
 RUN pecl install redis && docker-php-ext-enable redis
