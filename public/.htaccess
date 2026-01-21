@@ -5,24 +5,26 @@
 
     RewriteEngine On
 
-    # Handle Authorization Header
+    # 1. Handle Authorization Header
+    # Crucial for API tokens (Bearer tokens) to pass through to Laravel
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Redirect Trailing Slashes If Not A Folder...
+    # 2. Redirect Trailing Slashes If Not A Folder
+    # Example: /home/ -> /home
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Send Requests To Front Controller...
+    # 3. Handle Front Controller
+    # Redirects everything to index.php inside the current folder
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# Deny access to hidden files
-<FilesMatch "^\.">
-    Order allow,deny
-    Deny from all
+# 4. Deny access to hidden files (Apache 2.4 Syntax)
+# Blocks access to .env, .git, etc., but allows .well-known (for SSL)
+<FilesMatch "^\.(?!well-known)">
+    Require all denied
 </FilesMatch>
-
