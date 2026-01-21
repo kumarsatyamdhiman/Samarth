@@ -8,9 +8,9 @@ FROM php:8.2-apache-bookworm
 # 1. Install Dependencies
 RUN apt-get update && apt-get install -y \
     git unzip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
-    libxml2-dev libonig-dev libpq-dev curl gnupg \
+    libxml2-dev libonig-dev libpq-dev libsqlite3-dev curl gnupg \
     && docker-php-ext-configure gd --with-jpeg --with-freetype \
-    && docker-php-ext-install pdo_mysql pdo_pgsql zip exif pcntl gd bcmath intl mbstring xml
+    && docker-php-ext-install pdo_mysql pdo_pgsql pdo_sqlite zip exif pcntl gd bcmath intl mbstring xml
 
 # Install Redis via PECL (it's not a core extension)
 RUN pecl install redis && docker-php-ext-enable redis
@@ -55,11 +55,13 @@ COPY . .
 # 7. Build Assets
 RUN npm run build && npm prune --production
 
-# 8. Permissions (Corrected)
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# 8. Permissions (Corrected) & SQLite Setup
+RUN touch /var/www/html/database/database.sqlite \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+
 
 # 9. STARTUP COMMAND (The Port Fix)
 # This replaces port 80 with the Render $PORT variable right before the server starts.
-CMD ["/bin/bash", "-c", "sed -i \"s/80/$PORT/g\" /etc/apache2/sites-available/000-default.conf && sed -i \"s/80/$PORT/g\" /etc/apache2/ports.conf && php artisan config:cache && apache2-foreground"]
+CMD ["/bin/bash", "-c", "sed -i \"s/80/$PORT/g\" /etc/apache2/sites-available/000-default.conf && sed -i \"s/80/$PORT/g\" /etc/apache2/ports.conf && php artisan config:cache && php artisan migrate --force --seed && apache2-foreground"]
 
