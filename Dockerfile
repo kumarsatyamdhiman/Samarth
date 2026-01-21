@@ -55,9 +55,11 @@ COPY . .
 # 7. Build Assets
 RUN npm run build && npm prune --production
 
-# 8. Permissions (Corrected)
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# 8. Permissions (Corrected) & SQLite Setup
+RUN touch /var/www/html/database/database.sqlite \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
+
 
 # 9. STARTUP COMMAND (The Port Fix)
 # This replaces port 80 with the Render $PORT variable right before the server starts.
