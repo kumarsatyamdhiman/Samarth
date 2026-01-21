@@ -1,0 +1,512 @@
+@extends('layouts.app')
+
+@section('content')
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    insta: {
+                        pink: '#E1306C',
+                        orange: '#F58301',
+                        purple: '#833AB4',
+                        blue: '#405DE6',
+                        gradient: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)'
+                    }
+                },
+                animation: {
+                    'bounce-short': 'bounce 0.3s ease-out',
+                }
+            }
+        }
+    }
+</script>
+
+<style>
+    .insta-gradient { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+    .story-ring-gradient { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888, #833AB4, #405DE6); padding: 2px; border-radius: 50%; }
+    .story-ring-seen { background: #dbdbdb; padding: 2px; border-radius: 50%; }
+    .verified-badge { background: #1D9BF0; border-radius: 50%; padding: 2px; }
+    .like-anim { animation: likePop 0.3s ease-out; }
+    @keyframes likePop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+    .double-tap-hint { animation: fadeInOut 1.5s ease-out; }
+    @keyframes fadeInOut { 0%, 100% { opacity: 0; } 20%, 80% { opacity: 1; } }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .story-text-overlay { text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+</style>
+
+<div class="min-h-screen bg-black pb-16">
+    <!-- Header -->
+    <header class="sticky top-0 z-40 bg-black/95 backdrop-blur-md border-b border-gray-800">
+        <div class="flex items-center justify-between px-4 py-3">
+            <h1 class="text-2xl font-bold tracking-tight" style="font-family: 'Billabong', cursive;">
+                <span class="insta-gradient bg-clip-text text-transparent">SAMARTH</span>
+            </h1>
+            <div class="flex items-center gap-4">
+                <button class="text-white hover:text-gray-300 transition-colors relative" onclick="openNotifications()">
+                    <i class="far fa-heart text-xl"></i>
+                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold">2</span>
+                </button>
+                <button class="text-white hover:text-gray-300 transition-colors relative" onclick="openMessages()">
+                    <i class="far fa-paper-plane text-xl"></i>
+                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] flex items-center justify-center text-white font-bold">2</span>
+                </button>
+            </div>
+    </header>
+
+    <!-- Stories Section -->
+    <div class="border-b border-gray-800">
+        <div class="flex gap-4 px-3 overflow-x-auto hide-scrollbar py-3">
+            @auth
+            <div class="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer" onclick="openCreateStory()">
+                <div class="w-16 h-16 rounded-full story-ring-gradient relative">
+                    <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                        @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                            <img src="{{ auth()->user()->profile->avatar }}" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+                                {{ substr(auth()->user()->username ?? 'U', 0, 1) }}
+                            </div>
+                        @endif
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center border-2 border-black">
+                        <i class="fas fa-plus text-white text-xs"></i>
+                    </div>
+                <span class="text-[10px] text-gray-400">आप</span>
+            </div>
+            @else
+            <div class="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer" onclick="window.location.href='{{ route('login.show') }}'">
+                <div class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center overflow-hidden border-2 border-gray-700">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <i class="fas fa-plus text-gray-500 text-2xl"></i>
+                    </div>
+                <span class="text-[10px] text-gray-400">आप</span>
+            </div>
+            @endauth
+            
+            @foreach($stories as $index => $story)
+            @php $isSample = isset($story['is_sample']) && $story['is_sample']; $colorClass = $story['color'] ?? 'from-gray-500 to-gray-600'; @endphp
+            <div class="flex-shrink-0 flex flex-col items-center gap-1 cursor-pointer" onclick="openStory({{ $index }})">
+                <div class="w-16 h-16 rounded-full {{ $isSample ? 'story-ring-gradient' : 'story-ring-seen' }}">
+                    <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                        @if(!$isSample && $story['image'])
+                            <img src="{{ $story['image'] }}" class="w-full h-full object-cover" alt="Story">
+                        @else
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br {{ $colorClass }} flex items-center justify-center text-white font-bold text-lg">
+                                {{ substr($story['name'] ?? 'U', 0, 1) }}
+                            </div>
+                        @endif
+                    </div>
+                <span class="text-[10px] text-gray-400 max-w-[60px] truncate">{{ $story['name'] }}</span>
+            </div>
+            @endforeach
+        </div>
+
+    <!-- Feed Posts -->
+    <div id="feed-container">
+        @forelse($posts as $index => $post)
+        <div class="bg-black border-b border-gray-800 mb-1" id="post-{{ $index }}" ondblclick="doubleTapLike({{ $index }})">
+            <div class="flex items-center justify-between px-3 py-2.5">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full story-ring-seen">
+                        <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                            <div class="w-7 h-7 rounded-full bg-gradient-to-br {{ $post->user->color ?? 'from-gray-500 to-gray-600' }} flex items-center justify-center text-white text-xs font-bold">
+                                {{ substr($post->user->first_name ?? 'U', 0, 1) }}
+                            </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-1">
+                            <span class="text-sm font-semibold text-white">{{ $post->user->first_name ?? 'User' }}</span>
+                            @if($post->user->verified ?? false)
+                            <span class="verified-badge"><i class="fas fa-check text-white text-[8px]"></i></span>
+                            @endif
+                        </div>
+                        <span class="text-[10px] text-gray-400">{{ '@' . ($post->user->username ?? 'user') }}</span>
+                    </div>
+                <button class="text-gray-400 hover:text-white p-2"><i class="fas fa-ellipsis-h"></i></button>
+            </div>
+            
+            <div class="relative aspect-square bg-gray-900">
+                @if($post->image)
+                <img src="{{ $post->image }}" class="w-full h-full object-cover" alt="Post image" loading="lazy">
+                @else
+                <div class="w-full h-full flex items-center justify-center text-gray-500"><i class="fas fa-image text-4xl"></i></div>
+                @endif
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 double-tap-hint" id="double-tap-{{ $index }}">
+                    <i class="fas fa-heart text-white text-7xl drop-shadow-lg like-anim"></i>
+                </div>
+            
+            <div class="px-3 py-2.5">
+                <div class="flex items-center justify-between mb-2.5">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleLike({{ $index }})" id="like-btn-{{ $index }}" class="text-white hover:text-gray-300 transition-colors {{ $post->liked_by_user ? 'text-red-500' : '' }}">
+                            <i class="{{ $post->liked_by_user ? 'fas' : 'far' }} fa-heart text-xl" id="like-icon-{{ $index }}"></i>
+                        </button>
+                        <button class="text-white hover:text-gray-300 transition-colors"><i class="far fa-comment text-xl"></i></button>
+                        <button class="text-white hover:text-gray-300 transition-colors"><i class="far fa-paper-plane text-xl"></i></button>
+                    </div>
+                    <button onclick="toggleBookmark({{ $index }})" id="bookmark-btn-{{ $index }}" class="text-white hover:text-gray-300 transition-colors {{ $post->bookmarked_by_user ? 'text-yellow-400' : '' }}">
+                        <i class="{{ $post->bookmarked_by_user ? 'fas' : 'far' }} fa-bookmark text-xl" id="bookmark-icon-{{ $index }}"></i>
+                    </button>
+                </div>
+                <p class="text-sm font-semibold text-white mb-1.5" id="likes-count-{{ $index }}">{{ number_format($post->likes_count ?? 0) }} likes</p>
+                <div class="mb-1.5">
+                    <span class="text-sm font-semibold text-white mr-2">{{ $post->user->first_name ?? 'User' }}</span>
+                    <span class="text-sm text-white whitespace-pre-line">{{ $post->content ?? '' }}</span>
+                </div>
+                @if(preg_match_all('/#(\w+)/', $post->content ?? '', $matches))
+                <div class="flex flex-wrap gap-1 mb-1.5">
+                    @foreach($matches[0] as $hashtag)
+                    <span class="text-sm text-blue-400 cursor-pointer">{{ $hashtag }}</span>
+                    @endforeach
+                </div>
+                @endif
+                <button class="text-gray-400 text-sm">{{ ($post->comments_count ?? 0) > 0 ? 'View all ' . ($post->comments_count) . ' comments' : 'No comments yet' }}</button>
+                <p class="text-[10px] text-gray-500 mt-1 uppercase">{{ $post->time_ago ?? 'Just now' }}</p>
+            </div>
+        @empty
+        <div class="flex flex-col items-center justify-center py-20 text-center px-4">
+            <i class="fas fa-photo-video text-gray-600 text-5xl mb-4"></i>
+            <h3 class="text-xl font-semibold text-white mb-2">No Posts Yet</h3>
+            <p class="text-gray-400 text-sm">Be the first to share something!</p>
+            @auth
+            <button onclick="openCreatePost()" class="mt-4 px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-full">Create Post</button>
+            @else
+            <a href="{{ route('login.show') }}" class="mt-4 px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-full">Login to Post</a>
+            @endauth
+        </div>
+        @endforelse
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-black border-t border-gray-800">
+        <div class="flex justify-around items-center h-14 max-w-md mx-auto">
+            <a href="{{ route('social.index') }}" class="flex flex-col items-center justify-center w-full h-full text-white">
+                <i class="fas fa-home text-xl"></i>
+            </a>
+            <button class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white transition-colors" onclick="openSearch()">
+                <i class="fas fa-search text-xl"></i>
+            </button>
+            <button onclick="openCreatePost()" class="flex flex-col items-center justify-center w-full h-full text-white">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 flex items-center justify-center">
+                    <i class="fas fa-plus text-lg"></i>
+                </div>
+            </button>
+            <button class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white transition-colors">
+                <i class="far fa-play-square text-xl"></i>
+            </button>
+            <a href="{{ route('profile.show') }}" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-white transition-colors">
+                @auth
+                    @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                        <img src="{{ auth()->user()->profile->avatar }}" class="w-6 h-6 rounded-full object-cover">
+                    @else
+                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white text-xs font-bold">{{ substr(auth()->user()->username ?? 'U', 0, 1) }}</div>
+                    @endif
+                @else<i class="far fa-user text-xl"></i>@endauth
+            </a>
+        </div>
+    </nav>
+</div>
+
+<!-- Create Story Modal -->
+<div id="create-story-modal" class="fixed inset-0 z-50 bg-black hidden">
+    <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+            <button onclick="closeCreateStory()" class="text-white hover:text-gray-300"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="text-lg font-bold text-white">New Story</h3>
+            <button class="text-blue-400 font-semibold" onclick="shareStory()" id="share-story-btn" disabled>Share</button>
+        </div>
+        <div class="flex-1 flex flex-col">
+            <div class="flex-1 relative bg-gray-900 flex items-center justify-center">
+                <img id="story-preview" src="" class="hidden w-full h-full object-contain">
+                <div id="story-placeholder" class="text-center">
+                    <label for="story-image-input" class="cursor-pointer">
+                        <div class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4"><i class="fas fa-camera text-gray-400 text-2xl"></i></div>
+                        <p class="text-gray-400 text-sm">Tap to add a photo</p>
+                    </label>
+                    <input type="file" id="story-image-input" accept="image/*" class="hidden" onchange="previewStoryImage(event)">
+                </div>
+            <div class="border-t border-gray-800 p-4">
+                <div class="flex justify-center gap-4">
+                    <button onclick="showStoryGallery()" class="p-2 text-gray-400 hover:text-white"><i class="fas fa-images text-xl"></i></button>
+                    <button onclick="toggleStoryText()" class="p-2 text-gray-400 hover:text-white"><i class="fas fa-font text-xl"></i></button>
+                    <button onclick="showStoryFilters()" class="p-2 text-gray-400 hover:text-white"><i class="fas fa-magic text-xl"></i></button>
+                </div>
+        </div>
+</div>
+
+<!-- Create Post Modal -->
+<div id="create-post-modal" class="fixed inset-0 z-50 bg-black/90 hidden">
+    <div class="h-full flex flex-col">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+            <button onclick="closeCreatePost()" class="text-white hover:text-gray-300"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="text-lg font-bold text-white">New Post</h3>
+            <button class="text-blue-400 font-semibold" onclick="sharePost()" id="share-post-btn" disabled>Share</button>
+        </div>
+        <div class="flex-1 flex flex-col">
+            <div class="flex-1 bg-black p-4">
+                <div class="flex gap-3">
+                    @auth
+                        @if(auth()->user()->profile && auth()->user()->profile->avatar)
+                            <img src="{{ auth()->user()->profile->avatar }}" class="w-10 h-10 rounded-full object-cover">
+                        @else
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white font-bold">{{ substr(auth()->user()->username ?? 'U', 0, 1) }}</div>
+                        @endif
+                    @endauth
+                    <textarea id="post-caption" placeholder="Write a caption..." class="flex-1 bg-transparent text-white text-lg placeholder-gray-500 focus:outline-none resize-none" rows="4" oninput="updatePostButton()"></textarea>
+                </div>
+                <div id="post-image-preview" class="hidden mt-4 relative">
+                    <img id="post-preview-img" src="" class="w-full h-64 object-cover rounded-lg">
+                    <button onclick="removePostImage()" class="absolute top-2 right-2 w-8 h-8 bg-black/70 rounded-full flex items-center justify-center text-white"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="mt-4">
+                    <label for="post-image-input" class="cursor-pointer flex items-center gap-2 text-gray-400 hover:text-white">
+                        <i class="fas fa-image text-xl"></i><span>Add image</span>
+                    </label>
+                    <input type="file" id="post-image-input" accept="image/*" class="hidden" onchange="previewPostImage(event)">
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-400 mb-2">Category:</p>
+                    <div class="flex flex-wrap gap-2">
+                        @php $categories = ['Career', 'Exam Prep', 'Motivation', 'Social Cause', 'Study']; @endphp
+                        @foreach($categories as $catIndex => $category)
+                        <button onclick="selectCategory('{{ $category }}', this)" class="category-btn px-3 py-1 bg-gray-800 text-white text-sm rounded-full border border-gray-700 hover:border-blue-500 transition-colors {{ $catIndex === 0 ? 'border-blue-500' : '' }}" data-category="{{ $category }}">{{ $category }}</button>
+                        @endforeach
+                    </div>
+            </div>
+    </div>
+
+<!-- Story Viewer Overlay -->
+<div id="story-viewer" class="fixed inset-0 z-50 bg-black hidden">
+    <div class="h-full relative">
+        <div class="absolute top-8 left-4 right-4 flex items-center gap-2 z-10">
+            <div class="flex items-center gap-2 flex-1">
+                <div class="w-8 h-8 rounded-full story-ring-gradient">
+                    <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden">
+                        <img id="story-viewer-avatar" src="" class="w-full h-full object-cover">
+                    </div>
+                <span id="story-viewer-username" class="text-white font-semibold text-sm"></span>
+                <span id="story-viewer-time" class="text-gray-400 text-xs ml-1"></span>
+            </div>
+            <button onclick="closeStoryViewer()" class="text-white hover:text-gray-300 p-2"><i class="fas fa-times"></i></button>
+        </div>
+        <img id="story-viewer-image" src="" class="w-full h-full object-contain">
+        <div class="absolute bottom-0 left-0 right-0 p-4 z-10">
+            <div class="flex items-center gap-2">
+                <input type="text" id="story-reply-input" placeholder="Send message..." class="flex-1 bg-gray-800/50 text-white placeholder-gray-400 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500">
+                <button onclick="sendStoryReply()" class="text-white hover:text-pink-500 p-2"><i class="far fa-heart text-xl"></i></button>
+                <button class="text-white hover:text-blue-500 p-2"><i class="far fa-paper-plane text-xl"></i></button>
+            </div>
+        <div class="absolute top-0 bottom-0 left-0 w-1/4 z-0" onclick="previousStory()"></div>
+        <div class="absolute top-0 bottom-0 right-0 w-1/4 z-0" onclick="nextStory()"></div>
+</div>
+
+<!-- Search Modal -->
+<div id="search-modal" class="fixed inset-0 z-50 bg-black hidden">
+    <div class="h-full flex flex-col">
+        <div class="px-4 py-3 border-b border-gray-800 pt-12">
+            <div class="flex items-center gap-3 bg-gray-800 rounded-lg px-4 py-2">
+                <i class="fas fa-search text-gray-400"></i>
+                <input type="text" placeholder="Search..." class="flex-1 bg-transparent text-white placeholder-gray-400 focus:outline-none" id="search-input">
+            </div>
+        <div class="flex-1 overflow-y-auto p-4">
+            <p class="text-gray-400 text-sm mb-4">Recent searches</p>
+            @php $recentSearches = ['IIT JEE', 'NEET 2025', 'Career Options', 'UPSC', 'Board Exams']; @endphp
+            @foreach($recentSearches as $search)
+            <div class="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-900 rounded-lg px-2">
+                <div class="flex items-center gap-3"><i class="fas fa-history text-gray-500"></i><span class="text-white">{{ $search }}</span></div>
+                <i class="fas fa-times text-gray-500 text-sm"></i>
+            </div>
+            @endforeach
+        </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-xl opacity-0 transform translate-y-4 transition-all duration-300 z-50 flex items-center gap-2">
+    <i class="fas fa-check-circle text-green-400" id="toast-icon"></i>
+    <span id="toast-message">Added to favorites</span>
+</div>
+
+<script>
+    let currentStoryIndex = 0;
+    let selectedCategory = 'Career';
+    let storyImageFile = null;
+    let postImageFile = null;
+    let storyList = @json($stories);
+    let postList = @json($posts);
+
+    // Double tap like
+    function doubleTapLike(postIndex) {
+        const hint = document.getElementById(`double-tap-${postIndex}`);
+        hint.classList.remove('opacity-0');
+        hint.classList.add('like-anim');
+        setTimeout(() => { hint.classList.add('opacity-0'); hint.classList.remove('like-anim'); }, 1500);
+        const likeBtn = document.getElementById(`like-btn-${postIndex}`);
+        if (!likeBtn.classList.contains('text-red-500')) toggleLike(postIndex);
+    }
+    
+    function toggleLike(postIndex) {
+        const btn = document.getElementById(`like-btn-${postIndex}`);
+        const icon = document.getElementById(`like-icon-${postIndex}`);
+        const countEl = document.getElementById(`likes-count-${postIndex}`);
+        let count = parseInt(countEl.innerText.replace(/,/g, '')) || 0;
+        
+        if (icon.classList.contains('far')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas', 'like-anim');
+            btn.classList.add('text-red-500');
+            count++;
+        } else {
+            icon.classList.remove('fas', 'like-anim');
+            icon.classList.add('far');
+            btn.classList.remove('text-red-500');
+            count--;
+        }
+        countEl.innerText = count.toLocaleString() + ' likes';
+    }
+    
+    function toggleBookmark(postIndex) {
+        const btn = document.getElementById(`bookmark-btn-${postIndex}`);
+        const icon = document.getElementById(`bookmark-icon-${postIndex}`);
+        if (icon.classList.contains('far')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            btn.classList.add('text-yellow-400');
+            showToast('Added to favorites', 'success');
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+            btn.classList.remove('text-yellow-400');
+            showToast('Removed from favorites', 'info');
+        }
+    }
+
+    // Story functions
+    function openCreateStory() { document.getElementById('create-story-modal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    function closeCreateStory() { document.getElementById('create-story-modal').classList.add('hidden'); document.body.style.overflow = ''; }
+    
+    function previewStoryImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            storyImageFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('story-preview').src = e.target.result;
+                document.getElementById('story-preview').classList.remove('hidden');
+                document.getElementById('story-placeholder').classList.add('hidden');
+                document.getElementById('share-story-btn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function shareStory() {
+        if (!storyImageFile) return;
+        showToast('Story shared!', 'success');
+        closeCreateStory();
+    }
+    
+    function toggleStoryText() { showToast('Text feature coming soon!', 'info'); }
+    function showStoryGallery() { showToast('Gallery feature coming soon!', 'info'); }
+    function showStoryFilters() { showToast('Filters feature coming soon!', 'info'); }
+
+    // Story viewer
+    function openStory(index) {
+        currentStoryIndex = index;
+        const story = storyList[index];
+        if (!story) return;
+        
+        document.getElementById('story-viewer-image').src = story.image || '';
+        document.getElementById('story-viewer-username').textContent = story.name || 'User';
+        document.getElementById('story-viewer').classList.remove('hidden');
+    }
+    
+    function closeStoryViewer() { document.getElementById('story-viewer').classList.add('hidden'); }
+    function previousStory() { if (currentStoryIndex > 0) { currentStoryIndex--; openStory(currentStoryIndex); } }
+    function nextStory() { if (currentStoryIndex < storyList.length - 1) { currentStoryIndex++; openStory(currentStoryIndex); } else { closeStoryViewer(); } }
+    function sendStoryReply() { showToast('Reply sent!', 'success'); }
+
+    // Post functions
+    function openCreatePost() { document.getElementById('create-post-modal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+    function closeCreatePost() { document.getElementById('create-post-modal').classList.add('hidden'); document.body.style.overflow = ''; }
+    
+    function previewPostImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            postImageFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('post-preview-img').src = e.target.result;
+                document.getElementById('post-image-preview').classList.remove('hidden');
+                document.getElementById('share-post-btn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function removePostImage() {
+        postImageFile = null;
+        document.getElementById('post-image-preview').classList.add('hidden');
+        document.getElementById('post-image-input').value = '';
+        document.getElementById('share-post-btn').disabled = true;
+    }
+    
+    function selectCategory(category, btn) {
+        selectedCategory = category;
+        document.querySelectorAll('.category-btn').forEach(b => { b.classList.remove('border-blue-500'); b.classList.add('border-gray-700'); });
+        btn.classList.add('border-blue-500');
+        btn.classList.remove('border-gray-700');
+    }
+    
+    function updatePostButton() {
+        const caption = document.getElementById('post-caption').value;
+        document.getElementById('share-post-btn').disabled = !caption.trim();
+    }
+    
+    function sharePost() {
+        const caption = document.getElementById('post-caption').value;
+        if (!caption.trim()) { showToast('Please write a caption', 'error'); return; }
+        showToast('Post shared!', 'success');
+        closeCreatePost();
+    }
+
+    // Search
+    function openSearch() { document.getElementById('search-modal').classList.remove('hidden'); }
+    
+    // Toast
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        const toastIcon = document.getElementById('toast-icon');
+        
+        toastMessage.innerText = message;
+        toastIcon.className = type === 'success' ? 'fas fa-check-circle text-green-400' : 'fas fa-info-circle text-blue-400';
+        toast.classList.remove('opacity-0', 'translate-y-4');
+        
+        setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-4'); }, 3000);
+    }
+    
+    function openNotifications() { showToast('Notifications coming soon!', 'info'); }
+    function openMessages() { showToast('Messages coming soon!', 'info'); }
+
+    // Close modals on backdrop click
+    document.querySelectorAll('#create-story-modal, #create-post-modal, #search-modal').forEach(modal => {
+        modal.addEventListener('click', function(e) { if (e.target === this) { this.classList.add('hidden'); document.body.style.overflow = ''; } });
+    });
+    
+    // Close on escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeCreateStory();
+            closeCreatePost();
+            closeStoryViewer();
+            document.getElementById('search-modal').classList.add('hidden');
+        }
+    });
+</script>
+
+@endsection

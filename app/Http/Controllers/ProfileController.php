@@ -57,4 +57,17 @@ class ProfileController extends Controller
         
         return back()->with('success', 'प्रोफ़ाइल अपडेट की गई!');
     }
+
+    public function notifications()
+    {
+        $user = Auth::user();
+        return view('profile.notifications', compact('user'));
+    }
+
+    public function settings()
+    {
+        $user = Auth::user();
+        $profile = $user->profile ?? new UserProfile();
+        return view('profile.settings', compact('user', 'profile'));
+    }
 }

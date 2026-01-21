@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+# Copy custom Apache configuration if it exists
+if [ -f "/var/www/html/docker/apache2.conf" ]; then
+    cp /var/www/html/docker/apache2.conf /etc/apache2/sites-available/000-default.conf
+    chmod 644 /etc/apache2/sites-available/000-default.conf
+    a2ensite 000-default 2>/dev/null || true
+fi
+
+# Ensure rewrite module is enabled
+a2enmod rewrite
+
+# Start Apache
+exec apache2-foreground
+
