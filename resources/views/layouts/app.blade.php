@@ -380,7 +380,7 @@
                 @auth
                     @php
                         $user = auth()->user();
-                        $displayName = $user->profile && $user->profile->display_name ? $user->profile->display_name : $user->username;
+                        $displayName = optional($user)->profile && $user->profile->display_name ? $user->profile->display_name : optional($user)->username;
                         $hour = date('H');
                         $greeting = $hour < 12 ? 'सुप्रभात' : ($hour < 17 ? 'नमस्ते' : 'शुभ संध्या');
                     @endphp
@@ -470,7 +470,7 @@
                         <img src="{{ auth()->user()->profile->avatar }}" class="w-7 h-7 rounded-full border-2 border-earth-saffron object-cover">
                     @else
                         <div class="w-7 h-7 rounded-full bg-gradient-to-br from-earth-saffron to-orange-500 flex items-center justify-center text-white text-sm font-bold">
-                            {{ substr(auth()->user()->username, 0, 1) }}
+                            {{ substr(optional(auth()->user())->username ?? 'U', 0, 1) }}
                         </div>
                     @endif
                 @else
