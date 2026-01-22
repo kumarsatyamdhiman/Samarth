@@ -231,8 +231,20 @@
             
             <div style="position: relative; z-index: 10; padding: 25px;">
                 <i class="fas fa-quote-left" style="font-size: 24px; color: rgba(251, 191, 36, 0.6); margin-bottom: 12px;"></i>
-                <h3 style="font-size: 17px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; color: white;">"शिक्षा वह हथियार है जिससे आप पूरी दुनिया बदल सकते हैं।"</h3>
-                <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">- नेल्सन मंडेला</p>
+                @php
+                    $quotes = [
+                        ['text' => 'शिक्षा वह हथियार है जिससे आप पूरी दुनिया बदल सकते हैं।', 'author' => 'नेल्सन मंडेला'],
+                        ['text' => 'उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।', 'author' => 'स्वामी विवेकानंद'],
+                        ['text' => 'सपने वो नहीं है जो हम नींद में देखते है, सपने वो है जो हमको नींद नहीं आने देते।', 'author' => 'ए.पी.जे. अब्दुल कलाम'],
+                        ['text' => 'कोशिश करने वालों की कभी हार नहीं होती।', 'author' => 'हरिवंश राय बच्चन'],
+                        ['text' => 'मेहनत इतनी खामोशी से करो कि सफलता शोर मचा दे।', 'author' => 'अज्ञात'],
+                        ['text' => 'खुद वो बदलाव बनिए जो दुनिया में आप देखना चाहते हैं।', 'author' => 'महात्मा गांधी'],
+                        ['text' => 'सफलता का कोई मंत्र नहीं है, यह तो सिर्फ परिश्रम का फल है।', 'author' => 'रुसकिन बॉन्ड']
+                    ];
+                    $randomQuote = $quotes[array_rand($quotes)];
+                @endphp
+                <h3 style="font-size: 17px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; color: white;">"{{ $randomQuote['text'] }}"</h3>
+                <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">- {{ $randomQuote['author'] }}</p>
                 <a href="{{ route('education.index') }}" class="btn-primary" style="padding: 10px 24px; border-radius: 30px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-block; color: white;">अधिक जानें</a>
             </div>
         </div>
