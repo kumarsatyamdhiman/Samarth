@@ -51,7 +51,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/videos/{id}/like', [App\Http\Controllers\VideoController::class, 'like'])->name('videos.like');
     Route::post('/videos/{id}/comment', [App\Http\Controllers\VideoController::class, 'comment'])->name('videos.comment');
     Route::post('/videos/{id}/share', [App\Http\Controllers\VideoController::class, 'share'])->name('videos.share');
+    
+    Route::post('/logout', [App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
 });
+
+// Auth Routes (Public)
+Route::get('/login', [App\Http\Controllers\AuthController::class, 'showLogin'])->name('login.show');
+Route::post('/login', [App\Http\Controllers\AuthController::class, 'login'])->name('login');
+Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegister'])->name('register.show');
+Route::post('/register', [App\Http\Controllers\AuthController::class, 'register'])->name('register');
+Route::get('/password/recovery', [App\Http\Controllers\AuthController::class, 'showRecovery'])->name('password.recovery');
+Route::post('/password/recovery', [App\Http\Controllers\AuthController::class, 'sendRecovery'])->name('password.send');
 
 // Read-only / Public routes
 Route::get('/social/comments/{postId}', [SocialController::class, 'getComments']);
