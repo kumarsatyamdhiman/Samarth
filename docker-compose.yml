@@ -1,98 +1,39 @@
-# ============================================
-# Samarth App - VPS Production - VOLUME FIXED
-# PHP 8.2 Apache + MySQL + Redis - No vendor overwrite
-# ============================================
-
 services:
-  # Apache + PHP Application (FIXED volumes)
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: samarth-app
     restart: always
     ports:
       - "8080:80"
-    volumes:
-      # Code sync (excludes vendor/)
-      - ./app:/var/www/html/app:ro
-      - ./config:/var/www/html/config:ro
-      - ./routes:/var/www/html/routes:ro
-      - ./resources:/var/www/html/resources:ro
-      # Laravel writable dirs only
-      - ./storage:/var/www/html/storage
-      - ./bootstrap/cache:/var/www/html/bootstrap/cache
-      # .env file
-      - ./.env:/var/www/html/.env:ro
+    env_file: .env
     networks:
       - samarth-network
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    environment:
-      - APP_ENV=production
-      - DB_CONNECTION=mysql
-      - SESSION_DRIVER=redis
-      - CACHE_DRIVER=redis
-      - QUEUE_CONNECTION=redis
+      - mysql
 
-  # MySQL 8.0 Database (Production optimized)
   mysql:
     image: mysql:8.0
     container_name: samarth-mysql
     restart: always
-    command: >
-      --default-authentication-plugin=mysql_native_password
-      --innodb-buffer-pool-size=256M
-      --innodb-log-file-size=64M
-      --max-connections=500
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
-      --innodb-flush-log-at-trx-commit=1
-      --sync-binlog=1
+    env_file: .env
     environment:
-      MYSQL_ROOT_PASSWORD: samarth_root_pass
-      MYSQL_DATABASE: samarth
-      MYSQL_USER: samarth
-      MYSQL_PASSWORD: samarth_pass
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_DATABASE: 
+      MYSQL_USER: 
+      MYSQL_PASSWORD: ""
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     networks:
       - samarth-network
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psamarth_root_pass"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  # Redis Cache (Production sessions/caching)
   redis:
     image: redis:7-alpine
     container_name: samarth-redis
     restart: always
-    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
-    volumes:
-      - redis_data:/data
     networks:
       - samarth-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
 networks:
   samarth-network:
-    driver: bridge
-    name: samarth-network
-
 volumes:
   mysql_data:
-    driver: local
-  redis_data:
-    driver: local
-  postgres_data:
-    driver: local
