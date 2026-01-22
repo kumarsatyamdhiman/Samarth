@@ -107,12 +107,19 @@
 
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 5px 20px;">
             <div style="display: flex; align-items: center; gap: 12px;">
-                @php
+@php
                     $currentUser = $user ?? null;
                     $displayName = 'Guest';
                     $initials = 'GU';
                     if ($currentUser) {
-                        $displayName = ($currentUser->profile && $currentUser->profile->display_name) ? $currentUser->profile->display_name : $currentUser->username;
+                        // Handle both array and object - prioritize first_name
+                        if (is_array($currentUser)) {
+                            $firstName = $currentUser['first_name'] ?? '';
+                            $displayName = $firstName ?: ($currentUser['username'] ?? 'User');
+                        } else {
+                            $firstName = $currentUser->first_name ?? '';
+                            $displayName = $firstName ?: ($currentUser->username ?? 'User');
+                        }
                         $initials = strtoupper(substr($displayName, 0, 2));
                     }
                 @endphp
@@ -131,7 +138,7 @@
 
         <div style="padding: 10px 20px 20px 20px;">
             <h3 style="margin: 15px 0 8px 0; color: white; font-size: 20px; font-weight: 800; line-height: 1.3;">
-                सपननों की उड़ान भरें! 🚀
+                सपनों की उड़ान भरें! 🚀
             </h3>
             <p style="margin: 0 0 20px 0; color: rgba(255,255,255,0.6); font-size: 13px; line-height: 1.5;">
                 आपकी यात्रा सही दिशा में है। आज का लक्ष्य पूरा करें!
