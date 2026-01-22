@@ -54,6 +54,26 @@ class VideoController extends Controller
             if (!isset($item['views_count'])) {
                 $item['views_count'] = rand(1000, 50000);
             }
+            // Fix Thumbnails
+            $hasValidThumbnail = isset($item['thumbnail']) && 
+                filter_var($item['thumbnail'], FILTER_VALIDATE_URL) && 
+                !str_ends_with($item['thumbnail'], 'watch?v=' . ($item['id'] ?? '') . '.jpg'); // specific check for the bad data we saw
+
+            if (!$hasValidThumbnail || empty($item['thumbnail']) || str_contains($item['thumbnail'], 'youtube.com/watch')) {
+                // Try to extract ID from link
+                $link = $item['link'] ?? '';
+                $videoId = null;
+                
+                if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $link, $matches)) {
+                    $videoId = $matches[1];
+                }
+
+                if ($videoId) {
+                    $item['thumbnail'] = "https://img.youtube.com/vi/{$videoId}/mqdefault.jpg";
+                } elseif (empty($item['thumbnail'])) {
+                     $item['thumbnail'] = 'https://picsum.photos/400/225?random=' . ($item['id'] ?? rand());
+                }
+            }
             return (object) $item;
         }, $videosData));
         

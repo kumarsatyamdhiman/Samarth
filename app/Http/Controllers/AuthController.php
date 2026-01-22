@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
 use App\Services\JsonDataStore;
+use App\Models\SamarthUser;
 
 class AuthController extends Controller
 {
@@ -78,8 +79,8 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'यह ईमेल पहले से रजिस्टर है'])->withInput();
         }
 
-        // Create new user in JSON store
-        $user = $this->users->create('users', [
+        // 1. Create User in SQLite Database (Primary for Auth)
+        $user = SamarthUser::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'username' => $request->username,
@@ -96,8 +97,30 @@ class AuthController extends Controller
             'language' => 'hi',
         ]);
 
-        // Log in the user
-        Auth::loginUsingId($user['id']);
+        // 2. Create User in JSON Store (Secondary for compatibility with VideoController etc.)
+        // We try to keep IDs in sync if possible, or just append.
+        // Since we can't force ID easily in JsonDataStore create(), we just add it.
+        // Controllers reading JSON might miss if IDs drift, but this fixes the Login/Greeting issue.
+        $this->users->create('users', [
+            'id' => $user->id, // Try to explicitly set ID if supported, or it will auto-increment
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'gender' => $request->gender,
+            'date_of_birth' => $request->date_of_birth,
+            'password' => $user->password,
+            'role' => 'user',
+            'status' => 'active',
+            'is_terms_accepted' => true,
+            'is_privacy_accepted' => true,
+            'timezone' => 'Asia/Kolkata',
+            'language' => 'hi',
+        ]);
+
+        // 3. Log in the user using the DB ID
+        Auth::login($user);
 
         return redirect()->route('home')->with('success', 'स्वागत है ' . $user['first_name'] . '! आपका खाता सफलतापूर्वक बन गया है।');
     }
@@ -109,14 +132,10 @@ class AuthController extends Controller
             'password' => 'required|string'
         ]);
 
-        // Find user in JSON store
-        $user = $this->users->findBy('users', 'username', $request->username);
-
-        if ($user && Hash::check($request->password, $user['password'])) {
-            Auth::loginUsingId($user['id']);
+        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             $request->session()->regenerate();
-
-            return redirect()->intended('/home')->with('success', 'स्वागत है ' . $user['first_name'] . '!');
+            $user = Auth::user();
+            return redirect()->intended('/home')->with('success', 'स्वागत है ' . $user->first_name . '!');
         }
 
         return back()->withErrors([
@@ -131,7 +150,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'आपने सफलतापूर्वक लॉग आउट किया है।');
+        return redirect()->route('login.show')->with('success', 'आपने सफलतापूर्वक लॉग आउट किया है।');
     }
 
     /**

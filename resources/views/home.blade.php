@@ -61,6 +61,42 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    
+    .glass-card {
+        background: rgba(30, 27, 75, 0.6);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .glass-card-hover {
+        transition: all 0.3s ease;
+    }
+
+    .glass-card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px -12px rgba(234, 88, 12, 0.3);
+        border-color: rgba(234, 88, 12, 0.3);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        box-shadow: 0 4px 20px rgba(234, 88, 12, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 40px rgba(234, 88, 12, 0.5);
+    }
 </style>
 
 <div style="max-width: 480px; margin: 0 auto; padding-bottom: 90px; overflow-x: hidden;">
@@ -107,12 +143,18 @@
 
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 5px 20px;">
             <div style="display: flex; align-items: center; gap: 12px;">
-                @php
+@php
                     $currentUser = $user ?? null;
                     $displayName = 'Guest';
                     $initials = 'GU';
                     if ($currentUser) {
-                        $displayName = ($currentUser->profile && $currentUser->profile->display_name) ? $currentUser->profile->display_name : $currentUser->username;
+                        if (is_array($currentUser)) {
+                            $firstName = $currentUser['first_name'] ?? '';
+                            $displayName = $firstName ?: ($currentUser['username'] ?? 'User');
+                        } else {
+                            $firstName = $currentUser->first_name ?? '';
+                            $displayName = $firstName ?: ($currentUser->username ?? 'User');
+                        }
                         $initials = strtoupper(substr($displayName, 0, 2));
                     }
                 @endphp
@@ -131,7 +173,7 @@
 
         <div style="padding: 10px 20px 20px 20px;">
             <h3 style="margin: 15px 0 8px 0; color: white; font-size: 20px; font-weight: 800; line-height: 1.3;">
-                सपननों की उड़ान भरें! 🚀
+                सपनों की उड़ान भरें! 🚀
             </h3>
             <p style="margin: 0 0 20px 0; color: rgba(255,255,255,0.6); font-size: 13px; line-height: 1.5;">
                 आपकी यात्रा सही दिशा में है। आज का लक्ष्य पूरा करें!
@@ -224,9 +266,20 @@
             
             <div style="position: relative; z-index: 10; padding: 25px;">
                 <i class="fas fa-quote-left" style="font-size: 24px; color: rgba(251, 191, 36, 0.6); margin-bottom: 12px;"></i>
-                <h3 style="font-size: 17px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; color: white;">"शिक्षा वह हथियार है जिससे आप पूरी दुनिया बदल सकते हैं।"</h3>
-                <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">- नेल्सन मंडेला</p>
-                <a href="{{ route('education.index') }}" class="btn-primary" style="padding: 10px 24px; border-radius: 30px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-block; color: white;">अधिक जानें</a>
+                @php
+                    $quotes = [
+                        ['text' => 'शिक्षा वह हथियार है जिससे आप पूरी दुनिया बदल सकते हैं।', 'author' => 'नेल्सन मंडेला'],
+                        ['text' => 'उठो, जागो और तब तक मत रुको जब तक लक्ष्य की प्राप्ति न हो जाए।', 'author' => 'स्वामी विवेकानंद'],
+                        ['text' => 'सपने वो नहीं है जो हम नींद में देखते है, सपने वो है जो हमको नींद नहीं आने देते।', 'author' => 'ए.पी.जे. अब्दुल कलाम'],
+                        ['text' => 'कोशिश करने वालों की कभी हार नहीं होती।', 'author' => 'हरिवंश राय बच्चन'],
+                        ['text' => 'मेहनत इतनी खामोशी से करो कि सफलता शोर मचा दे।', 'author' => 'अज्ञात'],
+                        ['text' => 'खुद वो बदलाव बनिए जो दुनिया में आप देखना चाहते हैं।', 'author' => 'महात्मा गांधी'],
+                        ['text' => 'सफलता का कोई मंत्र नहीं है, यह तो सिर्फ परिश्रम का फल है।', 'author' => 'रुसकिन बॉन्ड']
+                    ];
+                    $randomQuote = $quotes[array_rand($quotes)];
+                @endphp
+                <h3 style="font-size: 17px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; color: white;">"{{ $randomQuote['text'] }}"</h3>
+                <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">- {{ $randomQuote['author'] }}</p>
             </div>
         </div>
     </div>
@@ -272,3 +325,4 @@
 </script>
 
 @endsection
+
