@@ -73,6 +73,7 @@ class HomeController extends Controller
         $userProgressData = PointsService::getUserProgress($user->id);
 
         return view('home', compact(
+            'user',
             'userProgress',
             'todayChallenges',
             'completedChallenges',

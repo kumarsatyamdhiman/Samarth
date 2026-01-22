@@ -1,0 +1,244 @@
+# SAMARTH Application - Subdomain Deployment Guide
+
+## 📋 Overview
+
+- **Application**: SAMARTH (Laravel 12 + PHP 8.2)
+- **Server**: 103.133.214.97:9825
+- **Target Directory**: `/home/udyogastra/public_html/Samarth`
+- **URL**: http://udyogastra.cequ.in
+- **Server Type**: cPanel/Shared Hosting
+
+## 🚀 Quick Deployment
+
+### Option 1: Using the Deployment Script
+
+```bash
+# Make the script executable
+chmod +x deploy_shared_hosting.sh
+
+# Full deployment
+./deploy_shared_hosting.sh deploy
+
+# Quick deployment (skip local dependencies)
+./deploy_shared_hosting.sh quick
+
+# Check status
+./deploy_shared_hosting.sh status
+
+# Rollback
+./deploy_shared_hosting.sh rollback
+```
+
+### Option 2: Manual Deployment
+
+```bash
+# 1. Generate app key locally
+php artisan key:generate
+
+# 2. Install dependencies
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+
+# 3. Create deployment archive
+tar --exclude='node_modules' --exclude='.git' -czf samarth-deploy.tar.gz .
+
+# 4. Upload to server
+scp -P 9825 samarth-deploy.tar.gz udyogastra@103.133.214.97:/home/udyogastra/
+
+# 5. SSH and deploy
+ssh -p 9825 udyogastra@103.133.214.97
+
+# On server:
+cd /home/udyogastra/public_html/Samarth
+tar -xzf ../samarth-deploy.tar.gz
+chmod -R 755 storage bootstrap/cache
+composer install --no-dev --optimize-autoloader
+php artisan config:cache
+php artisan migrate --force
+php artisan db:seed --force
+```
+
+## 📁 Directory Structure on Server
+
+```
+/home/udyogastra/
+├── public_html/
+│   └── Samarth/              # Application root
+│       ├── app/              # Application code
+│       ├── bootstrap/        # Laravel bootstrap
+│       ├── config/           # Configuration files
+│       ├── database/         # Database (SQLite)
+│       ├── public/           # Public assets (web root)
+│       ├── resources/        # Views, lang files
+│       ├── routes/           # Route files
+│       ├── storage/          # Storage (logs, cache, uploads)
+│       ├── vendor/           # Composer dependencies
+│       ├── .env              # Environment configuration
+│       └── artisan           # Laravel CLI
+```
+
+## ⚙️ Configuration
+
+### Environment Variables (.env)
+
+```env
+APP_NAME=SAMARTH
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=http://udyogastra.cequ.in
+APP_KEY=base64:your-generated-key
+
+# SQLite (no MySQL needed)
+DB_CONNECTION=sqlite
+DB_DATABASE=/home/udyogastra/public_html/Samarth/database/database.sqlite
+
+# Session & Cache
+SESSION_DRIVER=file
+CACHE_DRIVER=file
+
+# Timezone
+TIMEZONE=Asia/Kolkata
+LOCALE=hi
+FALLBACK_LOCALE=en
+```
+
+### Database Setup (SQLite)
+
+```bash
+# Create database directory and file
+mkdir -p /home/udyogastra/public_html/Samarth/database
+touch /home/udyogastra/public_html/Samarth/database/database.sqlite
+chmod 666 /home/udyogastra/public_html/Samarth/database/database.sqlite
+
+# Run migrations
+php artisan migrate --force
+
+# Seed data
+php artisan db:seed --force
+```
+
+## 🔧 Server Requirements
+
+- **PHP**: 8.2 or higher
+- **Extensions**: pdo, pdo_sqlite, mbstring, xml, curl, gd, zip
+- **Composer**: Available via SSH
+- **SSH Access**: With terminal/command execution
+
+### Check PHP Version
+```bash
+ssh -p 9825 udyogastra@103.133.214.97
+php -v
+```
+
+## 📊 Application Modules
+
+| Module | URL | Description |
+|--------|-----|-------------|
+| Home | http://udyogastra.cequ.in/ | Dashboard with daily quote |
+| Auth | http://udyogastra.cequ.in/login | User login |
+| Register | http://udyogastra.cequ.in/register | User registration |
+| Profile | http://udyogastra.cequ.in/profile | User profile management |
+| Education | http://udyogastra.cequ.in/education | Education streams & courses |
+| Social | http://udyogastra.cequ.in/social | Social feed & stories |
+| Videos | http://udyogastra.cequ.in/videos | Video sharing platform |
+| Challenges | http://udyogastra.cequ.in/challenges | User challenges |
+
+## 🔒 Security Checklist
+
+- [ ] Change `APP_DEBUG=false` in production
+- [ ] Generate strong `APP_KEY`
+- [ ] Set proper file permissions:
+  ```bash
+  chmod -R 755 storage bootstrap/cache
+  chmod 640 .env
+  ```
+- [ ] Disable directory listing in `.htaccess`
+
+## 📝 Common Commands
+
+```bash
+# Clear cache
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+
+# Rebuild cache
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Database migrations
+php artisan migrate
+php artisan migrate:status
+php artisan migrate:rollback
+
+# Run seeder
+php artisan db:seed
+
+# Check logs
+tail -f storage/logs/laravel.log
+```
+
+## 🔄 Updating the Application
+
+```bash
+# Using deploy script
+./deploy_shared_hosting.sh deploy
+
+# Or manually
+cd /home/udyogastra/public_html/Samarth
+git pull origin main  # if using git
+composer install --no-dev
+php artisan migrate
+php artisan config:cache
+```
+
+## 📱 Testing the Deployment
+
+After deployment, verify:
+
+1. **Homepage**: http://udyogastra.cequ.in
+2. **Login**: http://udyogastra.cequ.in/login
+3. **Registration**: http://udyogastra.cequ.in/register
+
+### Test Commands
+
+```bash
+# Test application
+php artisan tinker
+>>> echo "Test";
+
+# Check routes
+php artisan route:list
+
+# Test database
+php artisan db:show
+```
+
+## 📦 Files Included in Deployment
+
+```
+Core:
+├── app/           # Controllers, Models, Services
+├── bootstrap/     # App bootstrap
+├── config/        # Configuration
+├── database/      # Migrations, Seeders, SQLite
+├── public/        # Web root, assets
+├── resources/     # Views, lang
+├── routes/        # Web, API routes
+├── storage/       # Logs, cache, uploads
+└── vendor/        # Composer packages
+
+Configuration:
+├── .env           # Environment (create from .env.production)
+├── .env.production # Production template
+├── deploy_config.php # Deployment settings
+└── deploy_shared_hosting.sh # Deployment script
+```
+
+---
+
+**Deployment Date**: $(date)
+**Target URL**: http://udyogastra.cequ.in

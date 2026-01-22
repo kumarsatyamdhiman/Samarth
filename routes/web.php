@@ -12,6 +12,11 @@ Route::get('/', function () { return redirect()->route('home'); });
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/welcome', function () { return view('welcome'); });
 
+// Animation Route
+Route::get('/year-progress', function() {
+    return view('animations.year-progress');
+})->name('year.progress');
+
 // Social Routes (Public View, Protected Actions)
 Route::get('/social', [SocialController::class, 'index'])->name('social.index');
 

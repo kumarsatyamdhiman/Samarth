@@ -1,0 +1,47 @@
+@section('title', 'Welcome - SAMARTH')
+
+@section('content')
+<div class="card">
+    <h1 class="welcome-text">Welcome to SAMARTH</h1>
+    <p style="font-size: 1.1em; color: #666; line-height: 1.8;">
+        SAMARTH is a comprehensive platform designed to help students and professionals
+        achieve their educational and career goals. Explore courses, connect with others,
+        and participate in challenges to grow and learn.
+    </p>
+    
+    @auth
+        <div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;">
+            <h2 style="margin-bottom: 15px;">Your Dashboard</h2>
+            <p>Welcome back, <strong>{{ Auth::user()['first_name'] ?? 'User' }}</strong>!</p>
+            <p style="margin-top: 10px;">Continue your learning journey today.</p>
+        </div>
+    @endauth
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 20px;">Platform Features</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 3em; margin-bottom: 10px;">📚</div>
+            <h3>Education</h3>
+            <p style="color: #666;">Explore streams, courses & exams</p>
+        </div>
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 3em; margin-bottom: 10px;">👥</div>
+            <h3>Social</h3>
+            <p style="color: #666;">Connect & share with friends</p>
+        </div>
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 3em; margin-bottom: 10px;">🎬</div>
+            <h3>Videos</h3>
+            <p style="color: #666;">Watch educational content</p>
+        </div>
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 3em; margin-bottom: 10px;">🏆</div>
+            <h3>Challenges</h3>
+            <p style="color: #666;">Participate & win rewards</p>
+        </div>
+</div>
+@endsection
+</parameter>
+<parameter name="path">/Users/k.satyam/Desktop/samarth/resources/views/welcome.blade.php</parameter>

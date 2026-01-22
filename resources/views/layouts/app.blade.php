@@ -377,10 +377,17 @@
                     <text x="50" y="60" text-anchor="middle" font-size="28" font-weight="900" fill="url(#logoGradient)" filter="url(#glow)">S</text>
                 </svg>
                 
-                @auth
+@auth
                     @php
                         $user = auth()->user();
-                        $displayName = optional($user)->profile && $user->profile->display_name ? $user->profile->display_name : optional($user)->username;
+                        // Handle both array and object - prioritize first_name
+                        if (is_array($user)) {
+                            $firstName = $user['first_name'] ?? '';
+                            $displayName = $firstName ?: ($user['username'] ?? 'User');
+                        } else {
+                            $firstName = $user->first_name ?? '';
+                            $displayName = $firstName ?: ($user->username ?? 'User');
+                        }
                         $hour = date('H');
                         $greeting = $hour < 12 ? 'सुप्रभात' : ($hour < 17 ? 'नमस्ते' : 'शुभ संध्या');
                     @endphp

@@ -1,0 +1,23 @@
+APP_NAME=SAMARTH
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=http://udyogastra.cequ.in
+APP_KEY=base64:YourSecureRandomKeyHereGenerateUsingArtisan
+
+# SQLite Database for shared hosting
+DB_CONNECTION=sqlite
+DB_DATABASE=/home/udyogastra/public_html/Samarth/database/database.sqlite
+
+# Session & Cache
+SESSION_DRIVER=file
+CACHE_DRIVER=file
+QUEUE_CONNECTION=sync
+
+# Logging
+LOG_CHANNEL=stack
+LOG_LEVEL=error
+
+# Timezone
+TIMEZONE=Asia/Kolkata
+LOCALE=hi
+FALLBACK_LOCALE=en

@@ -1,0 +1,183 @@
+# SAMARTH Application - Deployment Checklist
+
+## Deployment Target
+- **Server**: 103.133.214.97:9825
+- **User**: udyogastra
+- **Path**: /home/udyogastra/public_html/Samarth
+- **URL**: http://udyogastra.cequ.in
+
+## Deployment Files Created
+
+| File | Purpose |
+|------|---------|
+| `deploy_shared_hosting.sh` | Automated deployment script |
+| `server_setup.sh` | Server setup script (run via SSH) |
+| `.env.production` | Production environment template |
+| `deploy_config.php` | Deployment configuration |
+| `DEPLOY_SHARED_HOSTING.md` | Complete deployment guide |
+
+## Pre-Deployment Checklist
+
+- [ ] Verify SSH connectivity to server (port 9825)
+- [ ] Confirm target directory structure exists
+- [ ] Check PHP version on server (8.2+ required)
+- [ ] Verify required PHP extensions installed
+- [ ] Test SSH password authentication
+- [ ] Ensure no existing application conflicts
+
+## Deployment Steps
+
+### Step 1: Local Preparation
+```bash
+cd /Users/k.satyam/Desktop/samarth
+
+# Make scripts executable
+chmod +x deploy_shared_hosting.sh server_setup.sh
+
+# Generate APP_KEY
+php artisan key:generate
+
+# Install dependencies
+composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+```
+
+### Step 2: Connect to Server
+```bash
+# Test SSH connection
+ssh -p 9825 udyogastra@103.133.214.97
+
+# Navigate to target directory
+cd /home/udyogastra/public_html/Samarth
+
+# Create directory structure
+mkdir -p app bootstrap config database public resources routes \
+    storage/framework/{sessions,views,cache} storage/logs \
+    storage/app/public vendor
+```
+
+### Step 3: Upload Files
+```bash
+# Option A: Using deploy script
+./deploy_shared_hosting.sh deploy
+
+# Option B: Manual upload
+scp -P 9825 -r app/ udyogastra@103.133.214.97:/home/udyogastra/public_html/Samarth/
+# ... repeat for all directories
+
+# Option C: Create tarball
+tar --exclude='node_modules' --exclude='.git' -czf samarth.tar.gz .
+scp -P 9825 samarth.tar.gz udyogastra@103.133.214.97:/home/udyogastra/
+ssh -p 9825 udyogastra@103.133.214.97 "cd /home/udyogastra/public_html/Samarth && tar -xzf ../samarth.tar.gz"
+```
+
+### Step 4: Server Configuration
+```bash
+# On server, run setup script
+bash < /path/to/server_setup.sh
+
+# Or manually:
+# 1. Create .env file from .env.production
+# 2. Create SQLite database
+# 3. Set permissions
+# 4. Install Composer deps
+```
+
+### Step 5: Database Setup
+```bash
+# On server
+cd /home/udyogastra/public_html/Samarth
+
+# Create SQLite database
+mkdir -p database
+touch database/database.sqlite
+chmod 666 database/database.sqlite
+
+# Run migrations
+php artisan migrate --force
+
+# Seed data
+php artisan db:seed --force
+```
+
+### Step 6: Final Setup
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+chmod -R 755 storage bootstrap/cache
+chmod 640 .env
+```
+
+### Step 7: Verify
+- [ ] Visit http://udyogastra.cequ.in
+- [ ] Check login page loads
+- [ ] Test user registration
+- [ ] Check server logs for errors
+
+## Post-Deployment Tasks
+
+- [ ] Configure SSL/HTTPS ( subdomain.cequ.in)
+- [ ] Set up automated backups
+- [ ] Test all modules:
+  - [ ] Home page
+  - [ ] User registration/login
+  - [ ] Education module
+  - [ ] Social features
+  - [ ] Video uploads
+  - [ ] Challenges
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| SSH connection timeout | Check firewall rules |
+| 500 Internal Error | Check `storage/logs/laravel.log` |
+| Permission denied | `chmod -R 755 storage bootstrap/cache` |
+| Database not found | Create SQLite database file |
+| Class not found | `composer dump-autoload` |
+
+### Check Logs
+```bash
+ssh -p 9825 udyogastra@103.133.214.97
+tail -50 /home/udyogastra/public_html/Samarth/storage/logs/laravel.log
+```
+
+## Rollback Procedure
+
+```bash
+# Using deploy script
+./deploy_shared_hosting.sh rollback
+
+# Manual rollback
+ssh -p 9825 udyogastra@103.133.214.97
+cd /home/udyogastra/public_html/Samarth
+cp .env.backup.* .env
+php artisan config:clear
+```
+
+## Update/Redeploy
+
+```bash
+# Full update
+./deploy_shared_hosting.sh deploy
+
+# Quick update
+./deploy_shared_hosting.sh quick
+```
+
+## Success Criteria
+
+✅ Application loads at http://udyogastra.cequ.in  
+✅ Login page is accessible  
+✅ User registration works  
+✅ No critical errors in logs  
+✅ All modules functional  
+
+---
+
+**Created**: $(date)  
+**Target URL**: http://udyogastra.cequ.in  
+**Status**: Ready for deployment

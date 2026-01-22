@@ -61,6 +61,42 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+    
+    .glass-card {
+        background: rgba(30, 27, 75, 0.6);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .glass-card-hover {
+        transition: all 0.3s ease;
+    }
+
+    .glass-card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px -12px rgba(234, 88, 12, 0.3);
+        border-color: rgba(234, 88, 12, 0.3);
+    }
+    
+    .gradient-text {
+        background: linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+        box-shadow: 0 4px 20px rgba(234, 88, 12, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 40px rgba(234, 88, 12, 0.5);
+    }
 </style>
 
 <div style="max-width: 480px; margin: 0 auto; padding-bottom: 90px; overflow-x: hidden;">
@@ -112,7 +148,6 @@
                     $displayName = 'Guest';
                     $initials = 'GU';
                     if ($currentUser) {
-                        // Handle both array and object - prioritize first_name
                         if (is_array($currentUser)) {
                             $firstName = $currentUser['first_name'] ?? '';
                             $displayName = $firstName ?: ($currentUser['username'] ?? 'User');
@@ -245,7 +280,6 @@
                 @endphp
                 <h3 style="font-size: 17px; font-weight: 700; line-height: 1.5; margin-bottom: 10px; color: white;">"{{ $randomQuote['text'] }}"</h3>
                 <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 20px;">- {{ $randomQuote['author'] }}</p>
-                <a href="{{ route('education.index') }}" class="btn-primary" style="padding: 10px 24px; border-radius: 30px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-block; color: white;">अधिक जानें</a>
             </div>
         </div>
     </div>
@@ -291,3 +325,4 @@
 </script>
 
 @endsection
+
