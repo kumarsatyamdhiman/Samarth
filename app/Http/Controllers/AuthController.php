@@ -154,7 +154,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'आपने सफलतापूर्वक लॉग आउट किया है।');
+        return redirect()->route('login.show')->with('success', 'आपने सफलतापूर्वक लॉग आउट किया है।');
     }
 
     /**
