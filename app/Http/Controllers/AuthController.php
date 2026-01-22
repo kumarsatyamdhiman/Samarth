@@ -127,20 +127,26 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string'
-        ]);
+        try {
+            $request->validate([
+                'username' => 'required|string',
+                'password' => 'required|string'
+            ]);
 
-        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
-            $request->session()->regenerate();
-            $user = Auth::user();
-            return redirect()->intended('/home')->with('success', 'स्वागत है ' . $user->first_name . '!');
+            if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
+                $request->session()->regenerate();
+                $user = Auth::user();
+                return redirect()->intended('/home')->with('success', 'स्वागत है ' . $user->first_name . '!');
+            }
+
+            return back()->withErrors([
+                'username' => 'गलत यूज़रनेम या पासवर्ड।',
+            ])->onlyInput('username');
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                'username' => 'System Error: ' . $e->getMessage(),
+            ])->onlyInput('username');
         }
-
-        return back()->withErrors([
-            'username' => 'गलत यूज़रनेम या पासवर्ड।',
-        ])->onlyInput('username');
     }
 
     public function logout(Request $request)
