@@ -67,6 +67,8 @@ Route::get('/register', [App\Http\Controllers\AuthController::class, 'showRegist
 Route::post('/register', [App\Http\Controllers\AuthController::class, 'register'])->name('register');
 Route::get('/password/recovery', [App\Http\Controllers\AuthController::class, 'showRecovery'])->name('password.recovery');
 Route::post('/password/recovery', [App\Http\Controllers\AuthController::class, 'sendRecovery'])->name('password.send');
+Route::post('/password/security/check', [App\Http\Controllers\AuthController::class, 'checkSecurityQuestion'])->name('password.security.check');
+Route::post('/password/security/reset', [App\Http\Controllers\AuthController::class, 'resetPassword'])->name('password.security.reset');
 
 // Read-only / Public routes
 Route::get('/social/comments/{postId}', [SocialController::class, 'getComments']);
