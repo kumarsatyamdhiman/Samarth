@@ -122,7 +122,7 @@ class AuthController extends Controller
         // 3. Log in the user using the DB ID
         Auth::login($user);
 
-        return redirect()->route('home')->with('success', 'स्वागत है ' . $user['first_name'] . '! आपका खाता सफलतापूर्वक बन गया है।');
+        return redirect()->route('home')->with('success', 'स्वागत है ' . $user->first_name . '! आपका खाता सफलतापूर्वक बन गया है।');
     }
 
     public function login(Request $request)
