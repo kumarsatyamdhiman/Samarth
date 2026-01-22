@@ -50,7 +50,9 @@
         @forelse($videos as $video)
         <div class="video-card bg-white dark:bg-slate-800 rounded-3xl p-4 shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer border border-transparent hover:border-orange-500/30 hover:-translate-y-1" 
              data-category="{{ $video->type ?? 'all' }}"
-             onclick="videoGallery.openVideo('{{ $video->id }}', '{{ addslashes($video->name) }}', '{{ $video->link }}', '{{ $video->thumbnail }}')">
+             data-video-id="{{ $video->id }}"
+             data-video-link="{{ $video->link }}"
+             data-thumbnail="{{ $video->thumbnail }}">
             
             <div class="relative aspect-video rounded-2xl overflow-hidden mb-4 bg-gradient-to-r from-gray-100 to-gray-200 shadow-inner">
                 <img src="{{ $video->thumbnail ?? 'https://picsum.photos/400/225?random=' . $video->id }}" 
@@ -177,6 +179,7 @@
 <!-- Styles & CDN -->
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -214,8 +217,8 @@ const videoGallery = {
                 const data = {
                     id: card.dataset.videoId || '1',
                     name: card.querySelector('h3').textContent,
-                    link: card.dataset.videoLink || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-                    thumb: card.querySelector('img').src,
+                    link: card.dataset.videoLink || '',
+                    thumb: card.dataset.thumbnail || card.querySelector('img').src,
                     category: card.dataset.category
                 };
                 this.openModal(data);
