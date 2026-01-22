@@ -427,7 +427,7 @@
                 </div>
             @endif
             
-            @if($errors->any())
+            @if(isset($errors) && $errors->any())
                 <div class="mx-4 mb-4 p-4 glass-card rounded-xl text-sm animate-fade-in-up">
                     <div class="flex items-center gap-2 text-red-400 font-bold mb-2">
                         <i class="fas fa-exclamation-circle"></i>
