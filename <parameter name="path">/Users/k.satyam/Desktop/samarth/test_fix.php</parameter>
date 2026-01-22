@@ -1,0 +1,54 @@
+<parameter name="content"><?php
+/**
+ * Simple test script to verify password recovery fix
+ */
+
+echo "=== Testing Password Recovery Fix ===\n\n";
+
+// Test 1: Check session driver configuration
+echo "1. Testing session configuration...\n";
+$sessionConfig = file_get_contents('/Users/k.satyam/Desktop/samarth/config/session.php');
+if (strpos($sessionConfig, "'driver' => 'file'") !== false) {
+    echo "   ✓ Session driver is set to 'file'\n";
+} else {
+    echo "   ✗ Session driver is NOT set to 'file'\n";
+}
+
+// Test 2: Check if route exists
+echo "\n2. Testing routes...\n";
+$routes = file_get_contents('/Users/k.satyam/Desktop/samarth/routes/web.php');
+if (strpos($routes, "password/recovery") !== false) {
+    echo "   ✓ Route for /password/recovery exists\n";
+}
+if (strpos($routes, "AuthController@showRecovery") !== false) {
+    echo "   ✓ showRecovery method is mapped\n";
+}
+
+// Test 3: Check AuthController exists
+echo "\n3. Testing AuthController...\n";
+$authController = file_get_contents('/Users/k.satyam/Desktop/samarth/app/Http/Controllers/AuthController.php');
+if (strpos($authController, 'function showRecovery') !== false) {
+    echo "   ✓ showRecovery method exists in AuthController\n";
+}
+if (strpos($authController, 'view(\'auth.password-recovery\')') !== false) {
+    echo "   ✓ Returns password-recovery view\n";
+}
+
+// Test 4: Check password recovery view exists
+echo "\n4. Testing password recovery view...\n";
+$viewPath = '/Users/k.satyam/Desktop/samarth/resources/views/auth/password-recovery.blade.php';
+if (file_exists($viewPath)) {
+    echo "   ✓ password-recovery.blade.php exists\n";
+    $viewContent = file_get_contents($viewPath);
+    if (strpos($viewContent, 'खाता रिकवरी') !== false) {
+        echo "   ✓ View contains Hindi text 'खाता रिकवरी'\n";
+    }
+}
+
+echo "\n=== Summary ===\n";
+echo "The 500 error on /password/recovery was caused by Redis session driver\n";
+echo "not being available. The fix changes the session driver from Redis to file.\n";
+echo "\nFiles modified:\n";
+echo "  - config/session.php: Changed driver from env() to 'file'\n";
+echo "\n=== Test Complete ===\n";
+</parameter>

@@ -1,0 +1,15 @@
+<parameter name="content">#!/bin/bash
+# Restart the Laravel development server
+
+echo "Stopping existing server..."
+pkill -f "artisan serve" 2>/dev/null
+sleep 2
+
+echo "Starting server on port 8080..."
+cd /Users/k.satyam/Desktop/samarth
+php artisan serve --host=0.0.0.0 --port=8080 &
+
+sleep 3
+echo "Server started!"
+echo "Test password recovery: http://localhost:8080/password/recovery"
+</parameter>
