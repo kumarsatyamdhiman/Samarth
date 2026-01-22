@@ -132,14 +132,10 @@ class AuthController extends Controller
             'password' => 'required|string'
         ]);
 
-        // Find user in JSON store
-        $user = $this->users->findBy('users', 'username', $request->username);
-
-        if ($user && Hash::check($request->password, $user['password'])) {
-            Auth::loginUsingId($user['id']);
+        if (Auth::attempt(['username' => $request->username, 'password' => $request->password])) {
             $request->session()->regenerate();
-
-            return redirect()->intended('/home')->with('success', 'स्वागत है ' . $user['first_name'] . '!');
+            $user = Auth::user();
+            return redirect()->intended('/home')->with('success', 'स्वागत है ' . $user->first_name . '!');
         }
 
         return back()->withErrors([
