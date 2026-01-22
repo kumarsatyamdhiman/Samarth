@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Session;
 use App\Services\JsonDataStore;
+use App\Models\SamarthUser;
 
 class AuthController extends Controller
 {
