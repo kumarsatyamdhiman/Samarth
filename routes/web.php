@@ -8,7 +8,7 @@ use App\Http\Controllers\SocialController;
 | Web Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () { return view('welcome-bundelkhand'); });
+Route::get('/', function () { return redirect()->route('login'); });
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home')->middleware('auth');
 Route::get('/welcome', function () { return view('welcome'); });
 
