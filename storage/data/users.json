@@ -67,5 +67,24 @@
         "language": "hi",
         "created_at": "2026-01-22T08:20:55.408340Z",
         "updated_at": "2026-01-22T08:20:55.409534Z"
+    },
+    {
+        "id": 5,
+        "first_name": "Satyam",
+        "last_name": "Satyam",
+        "username": "Satyam@",
+        "email": "cvbnm@fghjk.com",
+        "phone": "986543210",
+        "gender": "male",
+        "date_of_birth": "1995-02-02",
+        "password": "$2y$12$KLPJAOuAsejexpISxJH6IeZUpQ.1u\/LICo3GUAMm1qCFENm0WKvJO",
+        "role": "user",
+        "status": "active",
+        "is_terms_accepted": true,
+        "is_privacy_accepted": true,
+        "timezone": "Asia\/Kolkata",
+        "language": "hi",
+        "created_at": "2026-01-22T09:51:04.143127Z",
+        "updated_at": "2026-01-22T09:51:04.143237Z"
     }
 ]
